@@ -382,10 +382,8 @@
 
     <script>
         // ============= CONFIGURATION =============
-        // Auto-detect: use deployed backend if not running locally
-        const DEPLOYED_BACKEND = "https://ramadan-helper-api.onrender.com/api";
-        const LOCAL_BACKEND = "http://localhost:8000/api";
-        let API_BASE_URL = LOCAL_BACKEND; // Will be updated after checking
+        const API_BASE_URL = "http://localhost:8000/api";
+        let backendOnline = false;
         
         let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
         let currentImam = JSON.parse(localStorage.getItem('currentImam')) || null;
@@ -393,17 +391,6 @@
 
         // ============= INITIALIZATION =============
         document.addEventListener('DOMContentLoaded', async function() {
-            // Try local first, fallback to deployed
-            try {
-                const localCheck = await fetch('http://localhost:8000/', { method: 'GET', signal: AbortSignal.timeout(2000) });
-                if (localCheck.ok) {
-                    API_BASE_URL = LOCAL_BACKEND;
-                    console.log('Using local backend');
-                }
-            } catch (e) {
-                API_BASE_URL = DEPLOYED_BACKEND;
-                console.log('Using deployed backend');
-            }
             initLogin();
             checkBackendStatus();
         });
@@ -411,16 +398,17 @@
         // ============= BACKEND STATUS =============
         async function checkBackendStatus() {
             const indicator = document.getElementById('statusIndicator');
-            const backendUrl = API_BASE_URL.replace('/api', '');
             try {
-                const response = await fetch(backendUrl + '/', { method: 'GET' });
+                const response = await fetch('http://localhost:8000/', { method: 'GET', signal: AbortSignal.timeout(2000) });
                 if (response.ok) {
+                    backendOnline = true;
                     indicator.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-800';
                     indicator.innerHTML = '<span class="text-green-500">●</span> All services online';
                 }
             } catch (error) {
-                indicator.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-100 text-yellow-800';
-                indicator.innerHTML = '<span class="text-yellow-500">●</span> Connecting to server...';
+                backendOnline = false;
+                indicator.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-800';
+                indicator.innerHTML = '<span class="text-blue-500">●</span> Demo Mode - <a href="https://github.com/cheehub213/ramadan-webservice-project-" target="_blank" class="underline">Run backend for full features</a>';
             }
         }
 
@@ -593,7 +581,11 @@
                     throw new Error('API error');
                 }
             } catch (error) {
-                alert('Error generating dua. Make sure backend is running.');
+                // Show demo response when backend is offline
+                document.getElementById('duaEn').textContent = `O Allah, the Most Merciful, I come to You seeking help with ${category.toLowerCase()}. You know my situation regarding "${context}". Grant me patience, wisdom, and Your guidance. Make this easy for me and bless me with the best outcome. Ameen.`;
+                document.getElementById('duaAr').textContent = 'اللَّهُمَّ يَا رَحْمَنُ يَا رَحِيمُ، أَسْأَلُكَ الْعَوْنَ وَالتَّوْفِيقَ، وَاجْعَلْ أَمْرِي يُسْرًا، وَارْزُقْنِي الصَّبْرَ وَالْحِكْمَةَ. آمِين';
+                document.getElementById('duaInstructions').textContent = '🔹 Demo Mode: This is a sample dua. Run the backend locally for AI-generated personalized duas based on your specific situation.';
+                output.classList.remove('hidden');
             } finally {
                 btn.disabled = false;
                 btn.textContent = '📿 Generate My Dua';
@@ -640,7 +632,16 @@
                     throw new Error('API error');
                 }
             } catch (error) {
-                alert('Error analyzing question. Make sure backend is running.');
+                // Show demo response when backend is offline
+                document.getElementById('aiExplanation').textContent = `🔹 Demo Mode: Your question "${prompt}" would be analyzed by our AI to find the most relevant Quran verses and Hadiths. Run the backend locally for personalized AI-powered Islamic guidance.`;
+                document.getElementById('ayahArabic').textContent = 'وَاصْبِرْ وَمَا صَبْرُكَ إِلَّا بِاللَّهِ';
+                document.getElementById('ayahReference').textContent = '📍 Surah An-Nahl (16:127)';
+                document.getElementById('ayahTranslation').textContent = 'And be patient, and your patience is not but through Allah.';
+                document.getElementById('ayahExplanation').textContent = 'This verse reminds us that true patience comes from relying on Allah. Whatever challenge you face, turn to Him for strength.';
+                document.getElementById('hadithText').textContent = 'The Prophet (ﷺ) said: "Whoever believes in Allah and the Last Day should speak good or remain silent."';
+                document.getElementById('hadithSource').textContent = '📚 Sahih al-Bukhari & Muslim';
+                document.getElementById('hadithExplanation').textContent = 'This hadith teaches us the importance of mindful speech and self-control in our daily interactions.';
+                results.classList.remove('hidden');
             } finally {
                 btn.disabled = false;
                 loading.classList.add('hidden');
@@ -760,7 +761,17 @@
                         `).join('');
                 }
             } catch (error) {
-                console.error('Error loading imams:', error);
+                // Demo mode - show sample imams
+                availableImams = [
+                    { id: 1, name: 'Imam Ahmad', expertise: 'Quran & Islamic Law' },
+                    { id: 2, name: 'Imam Mohammed', expertise: 'Hadith & Islamic History' },
+                    { id: 3, name: 'Imam Fatima', expertise: "Women's Islamic Issues" }
+                ];
+                const select = document.getElementById('imamSelect');
+                select.innerHTML = '<option value="">-- Select an Imam --</option>' + 
+                    availableImams.map(imam => `
+                        <option value="${imam.id}">${imam.name} - ${imam.expertise}</option>
+                    `).join('');
             }
         }
 
@@ -788,9 +799,16 @@
                             </div>
                         `).join('');
                     }
+                } else {
+                    throw new Error('Backend offline');
                 }
             } catch (error) {
-                container.innerHTML = '<p class="text-red-500">Error loading conversations</p>';
+                // Demo mode message
+                container.innerHTML = `
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                        <p class="text-blue-800 font-semibold">🔹 Demo Mode</p>
+                        <p class="text-blue-700 text-sm mt-1">Chat with Imam requires the backend server. Start a conversation to see how it works!</p>
+                    </div>`;
             }
         }
 
@@ -884,10 +902,40 @@
                     // Open the new conversation
                     const imam = availableImams.find(i => i.id === parseInt(imamId));
                     openConversation(conv.id, imam ? imam.name : 'Imam', topic);
+                } else {
+                    throw new Error('Backend offline');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error starting conversation');
+                // Demo mode - show demo conversation
+                const imam = availableImams.find(i => i.id === parseInt(imamId));
+                document.getElementById('conversationTopic').value = '';
+                document.getElementById('initialMessage').value = '';
+                document.getElementById('imamSelect').value = '';
+                hideNewConversationForm();
+                
+                currentConversationId = 'demo';
+                document.getElementById('chatImamName').textContent = '🕌 ' + (imam ? imam.name : 'Imam');
+                document.getElementById('chatTopic').textContent = topic;
+                document.getElementById('conversationsList').classList.add('hidden');
+                document.getElementById('newConversationForm').classList.add('hidden');
+                document.getElementById('chatInterface').classList.remove('hidden');
+                
+                // Show demo messages
+                const container = document.getElementById('messagesContainer');
+                container.innerHTML = `
+                    <div class="mb-4 text-right">
+                        <div class="inline-block max-w-xs lg:max-w-md px-4 py-3 rounded-lg bg-purple-600 text-white">
+                            <p class="text-sm">${message}</p>
+                            <p class="text-xs mt-1 text-purple-200">${new Date().toLocaleString()}</p>
+                        </div>
+                    </div>
+                    <div class="mb-4 text-left">
+                        <div class="inline-block max-w-xs lg:max-w-md px-4 py-3 rounded-lg bg-white shadow border border-gray-200 text-gray-800">
+                            <p class="text-sm">🔹 <strong>Demo Mode:</strong> This is a demonstration of the Chat with Imam feature. When running the backend locally, your message would be saved and a real Imam can respond to it. The conversation persists so you can come back anytime to check for replies.</p>
+                            <p class="text-xs mt-1 text-gray-400">${new Date().toLocaleString()}</p>
+                        </div>
+                    </div>
+                `;
             }
         }
 
