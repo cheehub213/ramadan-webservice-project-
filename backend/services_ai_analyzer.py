@@ -1,5 +1,6 @@
 ﻿"""
 AI Analyzer Service - Personalized Islamic Guidance using AI
+Enhanced with full Quran database access via API
 """
 import json
 import httpx
@@ -14,6 +15,14 @@ load_dotenv(env_path)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+# Import the Quran service for dynamic verse fetching
+try:
+    from services_quran import QuranService
+    QURAN_SERVICE_AVAILABLE = True
+except ImportError:
+    QURAN_SERVICE_AVAILABLE = False
+    print("[AIAnalyzer] Warning: QuranService not available, using fallback")
 
 class AIAnalyzerService:
     """Service for AI-powered Islamic guidance and Quran/Hadith analysis"""
@@ -417,6 +426,143 @@ IMPORTANT: Return ONLY valid JSON, no markdown or extra text."""
         except Exception as e:
             print(f"Error calling Groq API: {str(e)}")
             return AIAnalyzerService.get_default_response()
+
+    @staticmethod
+    async def analyze_with_full_quran(user_prompt: str) -> dict:
+        """
+        Enhanced AI analysis using the full Quran database via API
+        This method:
+        1. Uses AI to identify the best Surah:Ayah reference for the user's question
+        2. Fetches the actual verse from the Quran API with Arabic + English
+        3. Returns a more comprehensive response
+        """
+        if not GROQ_API_KEY:
+            return AIAnalyzerService.get_default_response()
+        
+        if not QURAN_SERVICE_AVAILABLE:
+            return await AIAnalyzerService.analyze_prompt_with_ai(user_prompt)
+        
+        # First, use AI to identify the best verse reference
+        system_prompt = """You are an expert Islamic scholar AI. Your task is to recommend the MOST RELEVANT Quranic verse for the user's question.
+
+You have access to the ENTIRE Quran (114 Surahs, 6236 verses). Choose the verse that best addresses their concern.
+
+POPULAR VERSE REFERENCES BY TOPIC:
+- Patience/Hardship: 2:155, 94:5-6, 2:286, 3:139
+- Marriage/Spouse: 4:19, 30:21, 2:187, 25:74
+- Money/Provision: 65:2-3, 2:155, 51:22, 2:261
+- Parents/Family: 17:23-24, 31:14, 46:15, 4:36
+- Prayer/Dua: 2:186, 40:60, 2:45, 7:55-56
+- Forgiveness/Sin: 39:53, 4:110, 3:135, 25:70
+- Anger: 3:134, 41:34, 7:199
+- Anxiety/Fear: 2:286, 13:28, 94:5-6
+- Hope: 39:53, 12:87, 93:4-5
+- Death: 3:185, 29:57
+- Success: 23:1, 91:9, 3:104
+- Brotherhood: 49:10, 3:103
+- Justice: 4:135, 5:8, 16:90
+
+RESPONSE FORMAT (JSON only):
+{
+    "verse_ref": "<surah_number>:<ayah_number>",
+    "topic_identified": "<main topic from user's question>",
+    "hadith_id": <1-13>,
+    "ai_explanation": "<Personalized 2-3 sentence guidance connecting the verse to their question>"
+}
+
+IMPORTANT:
+- Use format like "2:155" for single verse or "94:5-6" for range
+- Choose hadith_id from 1-13 that complements the verse
+- Return ONLY valid JSON"""
+
+        user_message = f"User's question: \"{user_prompt}\"\n\nRecommend the most relevant Quran verse."
+
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    GROQ_API_URL,
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {GROQ_API_KEY}"
+                    },
+                    json={
+                        "model": "llama-3.3-70b-versatile",
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_message}
+                        ],
+                        "temperature": 0.3,
+                        "max_tokens": 500
+                    }
+                )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    ai_response = result["choices"][0]["message"]["content"]
+                    
+                    # Clean the response
+                    cleaned = ai_response.strip()
+                    if cleaned.startswith("```json"):
+                        cleaned = cleaned[7:]
+                    if cleaned.startswith("```"):
+                        cleaned = cleaned[3:]
+                    if cleaned.endswith("```"):
+                        cleaned = cleaned[:-3]
+                    cleaned = cleaned.strip()
+
+                    try:
+                        data = json.loads(cleaned)
+                    except json.JSONDecodeError:
+                        # Fallback to original method
+                        return await AIAnalyzerService.analyze_prompt_with_ai(user_prompt)
+                    
+                    verse_ref = data.get("verse_ref", "2:155")
+                    topic = data.get("topic_identified", "general guidance")
+                    hadith_id = int(data.get("hadith_id", 1))
+                    ai_explanation = data.get("ai_explanation", "")
+                    
+                    # Fetch the actual verse from Quran API
+                    verse_data = await QuranService.get_verse(verse_ref)
+                    
+                    if verse_data:
+                        # Build the ayah response
+                        ayah = {
+                            "id": 0,  # API-fetched verse
+                            "reference": verse_data["reference"],
+                            "arabic": verse_data["arabic"],
+                            "translation": verse_data["translation"],
+                            "explanation": f"From Surah {verse_data['surah_name_en']} ({verse_data['surah_name_ar']})",
+                            "keywords": [topic],
+                            "source": "quran_api"
+                        }
+                    else:
+                        # Fallback to local database
+                        ayah = AIAnalyzerService.QURAN_AYAHS[0]
+                    
+                    # Get hadith from local database
+                    selected_hadith = None
+                    for hadith in AIAnalyzerService.HADITHS:
+                        if hadith["id"] == hadith_id:
+                            selected_hadith = hadith
+                            break
+                    if not selected_hadith:
+                        selected_hadith = AIAnalyzerService.HADITHS[0]
+
+                    return {
+                        "ai_explanation": ai_explanation,
+                        "ayah": ayah,
+                        "hadith": selected_hadith,
+                        "topic_identified": topic,
+                        "verse_source": "quran_api" if verse_data else "local",
+                        "ai_generated": True
+                    }
+                else:
+                    print(f"Groq API error: {response.status_code}")
+                    return await AIAnalyzerService.analyze_prompt_with_ai(user_prompt)
+
+        except Exception as e:
+            print(f"Error in full Quran analysis: {str(e)}")
+            return await AIAnalyzerService.analyze_prompt_with_ai(user_prompt)
 
     @staticmethod
     def get_default_response() -> dict:

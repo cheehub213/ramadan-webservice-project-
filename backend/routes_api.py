@@ -503,7 +503,12 @@ async def analyze_question(request: AnalyzerRequest, db: Session = Depends(get_d
     
     AI matches your question to the most relevant Islamic guidance.
     """
-    result = await AIAnalyzerService.analyze_prompt_with_ai(request.question)
+    # Try enhanced method with full Quran API first
+    try:
+        result = await AIAnalyzerService.analyze_with_full_quran(request.question)
+    except Exception as e:
+        logger.error(f"Full Quran analysis failed: {e}")
+        result = await AIAnalyzerService.analyze_prompt_with_ai(request.question)
     
     # Log analysis
     try:
@@ -672,5 +677,6 @@ async def legacy_resend(request: ResendCodeRequest, db: Session = Depends(get_db
 @router.post("/users/login", tags=["Legacy"], include_in_schema=False)
 async def legacy_login(request: LoginRequest, db: Session = Depends(get_db)):
     return await login(request, db)
+
 
 
