@@ -1,0 +1,153 @@
+{
+  "example_responses": [
+    {
+      "title": "English Prompt → Bilingual Response",
+      "request": {
+        "prompt": "I'm feeling very tired and weak during fasting in Ramadan. My body is exhausted and I'm struggling to focus on prayer.",
+        "response_language": "bilingual"
+      },
+      "response": {
+        "status": "success",
+        "user_prompt": "I'm feeling very tired and weak during fasting in Ramadan. My body is exhausted and I'm struggling to focus on prayer.",
+        "prompt_language": "en",
+        "response_language": "bilingual",
+        "analysis": {
+          "topics": ["physical health", "weakness", "spirituality", "prayer"],
+          "keywords": ["tired", "weak", "exhausted", "struggling", "focus", "prayer"],
+          "emotion": "fatigued",
+          "summary": "User experiencing physical exhaustion during Ramadan fasting and finding it difficult to maintain spiritual focus in prayer"
+        },
+        "results": {
+          "quran_verses": [
+            {
+              "surah_number": 2,
+              "surah_name": "Al-Baqarah",
+              "ayah_number": 286,
+              "ayah_text_english": "Allah does not burden a soul beyond that it can bear...",
+              "ayah_text_arabic": "لا يكلف الله نفسا إلا وسعها...",
+              "explanation_english": "This verse directly addresses your feeling of being overwhelmed by physical exhaustion. It reassures you that Allah doesn't expect more than you can bear, meaning your reduced capacity during difficult moments is understood and accepted.",
+              "explanation_arabic": "تتناول هذه الآية مباشرة شعورك بالإرهاق الجسدي. تطمئنك بأن الله لا يطلب أكثر مما تستطيع تحمله، مما يعني أن قدرتك المنخفضة في اللحظات الصعبة مفهومة ومقبولة.",
+              "relevance_score": 0.92,
+              "matched_keywords": ["weak", "burden", "bear"]
+            },
+            {
+              "surah_number": 16,
+              "surah_name": "An-Nahl",
+              "ayah_number": 119,
+              "ayah_text_english": "But indeed, your Lord - to those who did wrong out of ignorance and then repented after that and corrected themselves - indeed, your Lord, thereafter, is Forgiving and Merciful.",
+              "ayah_text_arabic": "وإن ربك للذين عملوا السوء بجهالة ثم تابوا من بعد ذلك وأصلحوا إن ربك من بعدها لغفور رحيم",
+              "explanation_english": "This teaches compassion and mercy - reminding you that Allah understands human limitations. Your struggle is not a failure but a test of patience, and Allah's mercy encompasses those trying their best despite weakness.",
+              "explanation_arabic": "يعلم هذا الرحمة والشفقة - ويذكرك بأن الله يفهم القيود البشرية. كفاحك ليس فشلاً بل اختبار للصبر، ورحمة الله تشمل من يحاول جاهداً رغم الضعف.",
+              "relevance_score": 0.78,
+              "matched_keywords": ["weakness", "struggle"]
+            }
+          ],
+          "hadiths": [
+            {
+              "hadith_number": "1234",
+              "narrator": "Abu Huraira",
+              "source": "Sahih Bukhari",
+              "hadith_text_english": "The Prophet (peace be upon him) said: 'The strong believer is better and more beloved to Allah than the weak believer, while there is good in both.'",
+              "hadith_text_arabic": "قال النبي صلى الله عليه وسلم: المؤمن القوي خير وأحب إلى الله من المؤمن الضعيف، وفي كل خير",
+              "explanation_english": "This hadith acknowledges that even weak believers are beloved by Allah. It shifts perspective from seeing exhaustion as failure to understanding that your sincere effort despite weakness is what matters most.",
+              "explanation_arabic": "يعترف هذا الحديث بأن المؤمنين الضعفاء محبوبون من الله. إنه يغير وجهة النظر من رؤية الإرهاق كفشل إلى فهم أن مجهودك الصادق رغم الضعف هو ما يهم أكثر.",
+              "relevance_score": 0.85,
+              "matched_keywords": ["weak", "believer", "exhausted"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "title": "Arabic Prompt → Arabic Response",
+      "request": {
+        "prompt": "أشعر بالضعف والإرهاق أثناء الصيام في رمضان. جسدي متعب جداً وأنا أكافح للتركيز على الصلاة.",
+        "response_language": "ar"
+      },
+      "response": {
+        "status": "success",
+        "user_prompt": "أشعر بالضعف والإرهاق أثناء الصيام في رمضان. جسدي متعب جداً وأنا أكافح للتركيز على الصلاة.",
+        "prompt_language": "ar",
+        "response_language": "ar",
+        "analysis": {
+          "topics": ["الصحة الجسدية", "الضعف", "الروحانية", "الصلاة"],
+          "keywords": ["ضعف", "إرهاق", "متعب", "أكافح", "التركيز", "صلاة"],
+          "emotion": "منهك",
+          "summary": "المستخدم يعاني من الإرهاق الجسدي أثناء صيام رمضان ويجد صعوبة في الحفاظ على التركيز الروحي في الصلاة"
+        },
+        "results": {
+          "quran_verses": [
+            {
+              "surah_number": 2,
+              "surah_name": "البقرة",
+              "ayah_number": 286,
+              "ayah_text_arabic": "لا يكلف الله نفسا إلا وسعها لها ما كسبت وعليها ما اكتسبت",
+              "explanation_arabic": "تخاطب هذه الآية مباشرة شعورك بالإرهاق الجسدي. تطمئنك بأن الله لا يكلف نفساً إلا بما تطيق، مما يعني أن قدرتك المنخفضة في اللحظات الصعبة مفهومة ومقبولة من الله.",
+              "relevance_score": 0.92,
+              "matched_keywords": ["ضعف", "كلف", "وسعها"]
+            }
+          ],
+          "hadiths": [
+            {
+              "hadith_number": "2345",
+              "narrator": "أبو هريرة",
+              "source": "صحيح البخاري",
+              "hadith_text_arabic": "قال النبي صلى الله عليه وسلم: المؤمن القوي خير وأحب إلى الله من المؤمن الضعيف، وفي كل خير",
+              "explanation_arabic": "يعترف هذا الحديث بأن المؤمنين الضعفاء محبوبون من الله. إنه يغير وجهة النظر عن رؤية الإرهاق كفشل إلى فهم أن جهودك الصادقة رغم الضعف هي ما يهم أكثر.",
+              "relevance_score": 0.85,
+              "matched_keywords": ["ضعيف", "مؤمن", "متعب"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "title": "Direct Quran Search - Bilingual",
+      "request": {
+        "method": "GET",
+        "endpoint": "/api/v1/search/quran",
+        "parameters": {
+          "keywords": "patience,strength",
+          "response_language": "bilingual",
+          "limit": 2
+        }
+      },
+      "response": {
+        "status": "success",
+        "query": "patience,strength",
+        "response_language": "bilingual",
+        "total_results": 2,
+        "results": [
+          {
+            "surah": "Al-Baqarah",
+            "surah_number": 2,
+            "ayah_number": 153,
+            "text_english": "O you who have believed, seek help through patience and prayer. Indeed, Allah is with the patient.",
+            "text_arabic": "يا أيها الذين آمنوا استعينوا بالصبر والصلاة إن الله مع الصابرين",
+            "matched_keywords": ["patience"],
+            "relevance_score": 0.95
+          },
+          {
+            "surah": "Al-An'am",
+            "surah_number": 6,
+            "ayah_number": 34,
+            "text_english": "And We had already sent messengers before you and assigned to them wives and descendants...",
+            "text_arabic": "ولقد أرسلنا رسلا من قبلك وآتيناهم أزواجا وذرية...",
+            "matched_keywords": ["strength"],
+            "relevance_score": 0.72
+          }
+        ]
+      }
+    }
+  ],
+  "key_features_demonstrated": [
+    "Automatic language detection (English/Arabic)",
+    "Bilingual responses with both languages",
+    "Explanations for why each verse/hadith was selected",
+    "Relevance scoring (0.0 - 1.0)",
+    "Matched keywords showing matching logic",
+    "Emotional analysis from AI",
+    "Topic extraction from prompts",
+    "Support for both direct searches and intelligent analysis"
+  ]
+}

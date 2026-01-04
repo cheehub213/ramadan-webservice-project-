@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clear Browser Storage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px 5px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+        }
+        .red { background: #dc2626; }
+        .green { background: #059669; }
+        .blue { background: #2563eb; }
+        pre {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        h1 { color: #dc2626; }
+        h2 { color: #059669; margin-top: 30px; }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🧹 Browser Storage Cleaner</h1>
+        <p><strong>Problem:</strong> Your browser may have stored old login data that's causing issues.</p>
+        
+        <div class="status">
+            <strong>Current Status:</strong><br>
+            <span id="status">Checking...</span>
+        </div>
+
+        <h2>Current Data in Browser:</h2>
+        <pre id="currentData">Loading...</pre>
+
+        <h2>Actions:</h2>
+        <button class="green" onclick="showData()">🔍 Show What's Stored</button>
+        <button class="red" onclick="clearAll()">🧹 Clear ALL Storage</button>
+        <button class="blue" onclick="goToApp()">↗️ Open App</button>
+
+        <h2>Test Results:</h2>
+        <pre id="results">Click a button above to start...</pre>
+    </div>
+
+    <script>
+        function updateStatus() {
+            const user = localStorage.getItem('currentUser');
+            const imam = localStorage.getItem('currentImam');
+            const email = localStorage.getItem('userEmail');
+            
+            let status = '';
+            if (user || imam || email) {
+                status = '⚠️ WARNING: Old login data found! This might be blocking the login modal.';
+            } else {
+                status = '✅ No stored login data found. Storage is clean.';
+            }
+            document.getElementById('status').textContent = status;
+        }
+
+        function showData() {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                data[key] = localStorage.getItem(key);
+            }
+            
+            const output = Object.keys(data).length === 0 
+                ? '(No data stored)' 
+                : JSON.stringify(data, null, 2);
+            
+            document.getElementById('currentData').textContent = output;
+            document.getElementById('results').textContent = 
+                `Found ${Object.keys(data).length} items in localStorage:\n` +
+                Object.keys(data).join('\n- ');
+        }
+
+        function clearAll() {
+            const before = localStorage.length;
+            localStorage.clear();
+            const after = localStorage.length;
+            
+            document.getElementById('results').textContent = 
+                `✅ CLEARED!\n` +
+                `Before: ${before} items\n` +
+                `After: ${after} items\n` +
+                `\n` +
+                `Now try refreshing the app.html page.\n` +
+                `You should see the login buttons.`;
+            
+            document.getElementById('currentData').textContent = '(Empty - all cleared)';
+            updateStatus();
+            
+            alert('✅ Browser storage cleared! Now refresh your app.html page.');
+        }
+
+        function goToApp() {
+            window.location.href = 'app/schemas/frontend webservice site/app.html';
+        }
+
+        // Run on page load
+        window.addEventListener('load', function() {
+            updateStatus();
+            showData();
+        });
+    </script>
+</body>
+</html>

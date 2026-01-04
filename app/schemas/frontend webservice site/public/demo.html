@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ramadan Helper - Frontend Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .islamic { @apply bg-emerald-700; }
+        .islamic-light { @apply bg-emerald-500; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-emerald-700 to-emerald-500 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center py-4 px-4">
+            <h1 class="text-2xl font-bold">🌙 Ramadan Helper</h1>
+            <nav class="flex gap-6 items-center">
+                <a href="#home" class="hover:text-gray-100">Home</a>
+                <a href="#dua" class="hover:text-gray-100">Dua Generator</a>
+                <a href="#chat" class="hover:text-gray-100">Chat</a>
+                <a href="#imams" class="hover:text-gray-100">Find Imams</a>
+                <button class="bg-white text-emerald-700 px-3 py-1 rounded font-semibold">English</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        <!-- Home Section -->
+        <section id="home" class="container mx-auto py-12 px-4">
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-bold text-emerald-700 mb-4">Welcome to Ramadan Helper</h1>
+                <p class="text-xl text-gray-600 mb-8">Your personal Islamic companion for duas, guidance, and spiritual connection</p>
+                
+                <div class="flex gap-2 justify-center mb-8">
+                    <input type="email" placeholder="Enter your email" class="px-4 py-3 border-2 border-gray-300 rounded-lg w-64">
+                    <button class="px-6 py-3 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-600">Get Started</button>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div id="dua" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition cursor-pointer">
+                    <div class="text-4xl mb-4">📿</div>
+                    <h2 class="text-2xl font-bold text-emerald-700 mb-3">Dua Generator</h2>
+                    <p class="text-gray-600">Get personalized duas for your specific needs and concerns in English and Arabic</p>
+                </div>
+
+                <div id="chat" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition cursor-pointer">
+                    <div class="text-4xl mb-4">💬</div>
+                    <h2 class="text-2xl font-bold text-emerald-700 mb-3">Chat with Imams</h2>
+                    <p class="text-gray-600">Ask questions and receive guidance from learned Islamic scholars</p>
+                </div>
+
+                <div id="imams" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition cursor-pointer">
+                    <div class="text-4xl mb-4">🕌</div>
+                    <h2 class="text-2xl font-bold text-emerald-700 mb-3">Find Imams</h2>
+                    <p class="text-gray-600">Connect with experienced Islamic scholars in your area</p>
+                </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="bg-emerald-100 rounded-lg p-8 mb-12">
+                <h2 class="text-3xl font-bold text-emerald-700 mb-4">About Ramadan Helper</h2>
+                <p class="text-gray-700 mb-4">Ramadan Helper is designed to support your spiritual journey during the blessed month of Ramadan and throughout the year. We combine the wisdom of Islamic scholarship with modern technology to provide personalized guidance.</p>
+                <p class="text-gray-700">Whether you need spiritual guidance, personalized duas, or want to connect with Islamic scholars, we are here to help you make the most of your Ramadan experience.</p>
+            </div>
+
+            <!-- Dua Generator Demo -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold text-emerald-700 mb-6">Tell us your need</h2>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Select Category</label>
+                        <select class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg">
+                            <option>Fear & Anxiety</option>
+                            <option>Financial Hardship</option>
+                            <option>Health Issues</option>
+                            <option>Family Problems</option>
+                            <option>Career Guidance</option>
+                            <option>Spiritual Growth</option>
+                            <option>Relationship Issues</option>
+                            <option>Personal Challenges</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Situation</label>
+                        <textarea placeholder="Describe your situation in detail..." rows="6" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg resize-none"></textarea>
+                    </div>
+
+                    <button class="w-full px-6 py-3 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-600">Generate My Dua</button>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-100 to-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold text-emerald-700 mb-6">Your Personalized Dua</h2>
+
+                    <div class="mb-8 p-4 bg-white rounded-lg border-l-4 border-emerald-700">
+                        <h3 class="font-semibold text-emerald-700 mb-2">🇬🇧 English Dua</h3>
+                        <p class="text-gray-800 text-lg mb-4 italic">"O Allah, guide me to the right path and grant me wisdom in all my decisions. Help me overcome my fears and anxieties, and fill my heart with peace and tranquility. Ameen."</p>
+                        <p class="text-sm text-gray-600"><strong>How to use:</strong> Recite this dua with sincere intention, preferably after your prayers.</p>
+                    </div>
+
+                    <div class="mb-8 p-4 bg-white rounded-lg border-l-4 border-emerald-700 text-right" dir="rtl">
+                        <h3 class="font-semibold text-emerald-700 mb-2">🇸🇦 Arabic Dua</h3>
+                        <p class="text-gray-800 text-lg mb-4">"اللهم اهدني إلى الصراط المستقيم، وارزقني الحكمة في جميع قراراتي. ساعدني على التغلب على مخاوفي وقلقي، وامل قلبي بالسلام والهدوء. آمين."</p>
+                        <p class="text-sm text-gray-600"><strong>كيفية الاستخدام:</strong> اقرأ هذا الدعاء بنية صادقة، ويفضل بعد صلواتك مباشرة.</p>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button class="flex-1 px-4 py-2 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-600">👍 Helpful</button>
+                        <button class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300">👎 Not Helpful</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="bg-blue-50 rounded-lg p-8">
+                <h3 class="text-2xl font-bold text-emerald-700 mb-4">About This Dua</h3>
+                <p class="text-gray-700">This dua has been personalized using AI to address your specific situation while maintaining Islamic authenticity. Both English and Arabic versions are provided for your convenience. Make sincere dua with a focused heart and trust in Allah's wisdom.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p>© 2024 Ramadan Helper. May Allah accept from us. Ameen. 🌙</p>
+    </footer>
+
+    <script>
+        // Simple demo interactivity
+        document.querySelectorAll('.bg-white.rounded-lg.shadow.p-6.hover').forEach(card => {
+            card.addEventListener('click', function() {
+                const heading = this.querySelector('h2').textContent;
+                alert('Welcome to: ' + heading);
+            });
+        });
+    </script>
+</body>
+</html>

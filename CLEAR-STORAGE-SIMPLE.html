@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Storage - Simple</title>
+</head>
+<body style="font-family: Arial; padding: 40px; max-width: 600px; margin: 0 auto;">
+    
+    <h1 style="color: red;">🧹 Clear Browser Storage</h1>
+    
+    <p style="font-size: 18px; background: yellow; padding: 15px;">
+        <strong>This will clear any old login data that might be blocking your login buttons.</strong>
+    </p>
+    
+    <button onclick="clearStorage()" style="padding: 20px 40px; font-size: 20px; background: red; color: white; border: none; cursor: pointer; border-radius: 5px; margin: 20px 0;">
+        🧹 CLICK HERE TO CLEAR STORAGE
+    </button>
+    
+    <div id="message" style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+        Ready to clear storage...
+    </div>
+    
+    <script>
+        function clearStorage() {
+            // Clear all localStorage
+            localStorage.clear();
+            
+            // Show success message
+            document.getElementById('message').innerHTML = 
+                '<h2 style="color: green;">✅ SUCCESS!</h2>' +
+                '<p>All browser storage has been cleared.</p>' +
+                '<p><strong>Next steps:</strong></p>' +
+                '<ol>' +
+                '<li>Close this page</li>' +
+                '<li>Open app.html again (or refresh if already open)</li>' +
+                '<li>You should now see the login buttons</li>' +
+                '</ol>';
+            
+            // Also show alert
+            alert('✅ Storage cleared successfully!\n\nNow refresh your app.html page.');
+        }
+        
+        // Show what's currently in storage
+        window.onload = function() {
+            let count = localStorage.length;
+            if (count > 0) {
+                document.getElementById('message').innerHTML = 
+                    '<strong style="color: orange;">⚠️ Found ' + count + ' items in storage!</strong><br>' +
+                    'These might be blocking your login. Click the button above to clear them.';
+            } else {
+                document.getElementById('message').innerHTML = 
+                    '<strong style="color: green;">✅ Storage is already empty.</strong><br>' +
+                    'If you still can\'t login, the problem is something else.';
+            }
+        };
+    </script>
+    
+</body>
+</html>

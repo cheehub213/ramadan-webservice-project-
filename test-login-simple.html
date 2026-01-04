@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+        .green { background: #047857; }
+        .blue { background: #2563eb; }
+        .gray { background: #6b7280; }
+        .hidden { display: none !important; }
+        .form-box {
+            border: 2px solid #ccc;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        #status {
+            padding: 10px;
+            margin: 10px 0;
+            background: #e0e0e0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Login Button Test</h1>
+    <div id="status">Status: Ready. Click a button below.</div>
+    
+    <button onclick="testAlert()" class="gray">
+        1️⃣ Test Alert (Should show popup)
+    </button>
+    
+    <button onclick="testConsole()" class="gray">
+        2️⃣ Test Console (Check F12 Console)
+    </button>
+    
+    <button onclick="showUserForm()" class="green">
+        👤 Login as User
+    </button>
+    
+    <button onclick="showImamForm()" class="blue">
+        🕌 Login as Imam
+    </button>
+
+    <!-- User Form -->
+    <div id="userForm" class="form-box hidden">
+        <h2>👤 User Login Form</h2>
+        <input type="email" id="userEmail" placeholder="Your email">
+        <button onclick="submitUser()" class="green">Submit as User</button>
+        <button onclick="hideAll()" class="gray">Cancel</button>
+    </div>
+
+    <!-- Imam Form -->
+    <div id="imamForm" class="form-box hidden">
+        <h2>🕌 Imam Login Form</h2>
+        <input type="text" id="imamName" placeholder="Your name">
+        <input type="email" id="imamEmail" placeholder="Your email">
+        <button onclick="submitImam()" class="blue">Submit as Imam</button>
+        <button onclick="hideAll()" class="gray">Cancel</button>
+    </div>
+
+    <script>
+        // Update status message
+        function updateStatus(msg) {
+            document.getElementById('status').textContent = 'Status: ' + msg;
+            console.log('STATUS:', msg);
+        }
+
+        // Test 1: Simple alert
+        function testAlert() {
+            alert('✅ JavaScript is working! Alerts work fine.');
+            updateStatus('Alert test completed');
+        }
+
+        // Test 2: Console log
+        function testConsole() {
+            console.log('✅ Console logging works!');
+            console.log('Date:', new Date().toLocaleString());
+            updateStatus('Console test completed. Check F12 Developer Console.');
+            alert('Check the Console (F12) - you should see log messages there.');
+        }
+
+        // Show user login form
+        function showUserForm() {
+            console.log('showUserForm() called');
+            hideAll();
+            document.getElementById('userForm').classList.remove('hidden');
+            updateStatus('User login form shown');
+        }
+
+        // Show imam login form
+        function showImamForm() {
+            console.log('showImamForm() called');
+            hideAll();
+            document.getElementById('imamForm').classList.remove('hidden');
+            updateStatus('Imam login form shown');
+        }
+
+        // Hide all forms
+        function hideAll() {
+            console.log('hideAll() called');
+            document.getElementById('userForm').classList.add('hidden');
+            document.getElementById('imamForm').classList.add('hidden');
+            updateStatus('All forms hidden');
+        }
+
+        // Submit user
+        function submitUser() {
+            const email = document.getElementById('userEmail').value;
+            if (!email) {
+                alert('Please enter an email');
+                return;
+            }
+            console.log('User login:', email);
+            updateStatus('User logged in: ' + email);
+            alert('✅ User logged in successfully: ' + email);
+            hideAll();
+        }
+
+        // Submit imam
+        function submitImam() {
+            const name = document.getElementById('imamName').value;
+            const email = document.getElementById('imamEmail').value;
+            if (!name || !email) {
+                alert('Please enter both name and email');
+                return;
+            }
+            console.log('Imam login:', name, email);
+            updateStatus('Imam logged in: ' + name);
+            alert('✅ Imam logged in successfully: ' + name);
+            hideAll();
+        }
+
+        // Auto-run on page load
+        window.addEventListener('load', function() {
+            console.log('='.repeat(50));
+            console.log('PAGE LOADED SUCCESSFULLY');
+            console.log('JavaScript is running');
+            console.log('Current time:', new Date().toLocaleString());
+            console.log('='.repeat(50));
+            updateStatus('Page loaded. JavaScript is active.');
+        });
+    </script>
+</body>
+</html>

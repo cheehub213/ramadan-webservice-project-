@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ramadan Helper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-emerald-700 to-emerald-500 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center py-4 px-4">
+            <a href="#" onclick="showPage('home')" class="text-2xl font-bold cursor-pointer hover:opacity-80">🌙 Ramadan Helper</a>
+            <nav class="hidden md:flex gap-6 items-center">
+                <button onclick="showPage('home')" class="hover:text-gray-100">Home</button>
+                <button onclick="showPage('analyzer')" class="hover:text-gray-100 font-bold text-yellow-200">✨ Ask AI</button>
+                <button onclick="showPage('dua')" class="hover:text-gray-100">Dua Generator</button>
+                <button onclick="showPage('videos')" class="hover:text-gray-100">📺 Videos</button>
+                <button onclick="showPage('chat')" class="hover:text-gray-100 font-bold text-purple-200">💬 Chat with Imam</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Login Modal -->
+    <div id="loginModal" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 16px; padding: 40px; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 48px; margin-bottom: 10px;">🌙</div>
+                <h1 style="color: #047857; font-size: 28px; font-weight: bold; margin: 0;">Ramadan Helper</h1>
+                <p style="color: #666; margin-top: 8px;">Your Islamic Companion</p>
+            </div>
+            
+            <div id="loginTypeSelection">
+                <button id="btnUserLogin" style="display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: #047857; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">
+                    👤 Login as User
+                </button>
+                <button id="btnImamLogin" style="display: block; width: 100%; padding: 16px; background: #2563eb; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">
+                    🕌 Login as Imam
+                </button>
+            </div>
+            
+            <div id="userLoginForm" style="display: none;">
+                <h3 style="color: #047857; font-size: 20px; font-weight: bold; margin-bottom: 20px;">👤 User Login</h3>
+                <input type="email" id="userEmailInput" placeholder="your.email@example.com" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
+                <p id="userEmailError" style="color: #dc2626; font-size: 12px; margin-bottom: 8px; display: none;"></p>
+                <input type="text" id="userNameInput" placeholder="Your name" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 16px;">
+                <button id="btnSubmitUserLogin" style="display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: #047857; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">✓ Login</button>
+                <button id="btnBackFromUser" style="display: block; width: 100%; padding: 14px; background: #e5e7eb; color: #374151; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">← Back</button>
+                <div id="userLoginStatus" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
+            </div>
+            
+            <div id="imamLoginForm" style="display: none;">
+                <h3 style="color: #2563eb; font-size: 20px; font-weight: bold; margin-bottom: 20px;">🕌 Imam Login</h3>
+                <input type="text" id="imamNameInput" placeholder="Your full name" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
+                <input type="email" id="imamEmailInput" placeholder="your.email@example.com" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
+                <input type="password" id="imamPasswordInput" placeholder="Password" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 16px;">
+                <button id="btnSubmitImamLogin" style="display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: #2563eb; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">✓ Login as Imam</button>
+                <button id="btnBackFromImam" style="display: block; width: 100%; padding: 14px; background: #e5e7eb; color: #374151; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">← Back</button>
+                <div id="imamLoginStatus" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Header -->
+    <div id="userProfileHeader" class="hidden bg-gradient-to-r from-emerald-600 to-emerald-500 text-white py-3 px-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div><span id="userTypeDisplay"></span> <span id="userNameDisplay" class="ml-2 font-semibold"></span></div>
+            <button onclick="logout()" class="px-4 py-2 bg-white text-emerald-700 font-semibold rounded hover:bg-gray-100">Logout</button>
+        </div>
+    </div>
+
+    <!-- HOME PAGE -->
+    <div id="home" class="page active">
+        <main class="container mx-auto py-12 px-4">
+            <div id="backendStatus" class="mb-6 text-center">
+                <div id="statusIndicator" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-100 text-yellow-800">
+                    <span class="animate-pulse">●</span> Checking services...
+                </div>
+            </div>
+            
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-bold text-emerald-700 mb-4">Welcome to Ramadan Helper</h1>
+                <p class="text-xl text-gray-600 mb-8">Your personal Islamic companion for duas, guidance, and spiritual connection</p>
+                
+                <div class="flex gap-4 justify-center mb-8 flex-wrap">
+                    <button onclick="showPage('analyzer')" class="px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-bold rounded-xl hover:from-emerald-700 hover:to-emerald-800 shadow-lg text-lg">🤖 Ask AI</button>
+                    <button onclick="showPage('dua')" class="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 shadow-lg text-lg">📿 Generate Dua</button>
+                    <button onclick="showPage('videos')" class="px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:from-red-700 hover:to-red-800 shadow-lg text-lg">📺 Islamic Videos</button>
+                    <button onclick="showPage('chat')" class="px-8 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold rounded-xl hover:from-purple-700 hover:to-purple-800 shadow-lg text-lg">💬 Chat with Imam</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div onclick="showPage('analyzer')" class="bg-gradient-to-br from-emerald-50 to-white rounded-lg shadow p-6 hover:shadow-lg cursor-pointer border-2 border-emerald-200">
+                    <div class="text-4xl mb-4">🤖</div>
+                    <h2 class="text-2xl font-bold text-emerald-700 mb-3">Ask AI</h2>
+                    <p class="text-gray-600">Get Quran ayahs & Hadiths with AI-powered explanations</p>
+                    <span class="inline-block mt-3 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold">✨ AI Powered</span>
+                </div>
+
+                <div onclick="showPage('dua')" class="bg-white rounded-lg shadow p-6 hover:shadow-lg cursor-pointer">
+                    <div class="text-4xl mb-4">📿</div>
+                    <h2 class="text-2xl font-bold text-emerald-700 mb-3">Dua Generator</h2>
+                    <p class="text-gray-600">Get personalized duas in English and Arabic</p>
+                    <span class="inline-block mt-3 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">✨ AI Powered</span>
+                </div>
+
+                <div onclick="showPage('videos')" class="bg-white rounded-lg shadow p-6 hover:shadow-lg cursor-pointer">
+                    <div class="text-4xl mb-4">📺</div>
+                    <h2 class="text-2xl font-bold text-emerald-700 mb-3">Islamic Videos</h2>
+                    <p class="text-gray-600">Find Islamic videos on YouTube</p>
+                    <span class="inline-block mt-3 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">YouTube</span>
+                </div>
+
+                <div onclick="showPage('chat')" class="bg-gradient-to-br from-purple-50 to-white rounded-lg shadow p-6 hover:shadow-lg cursor-pointer border-2 border-purple-200">
+                    <div class="text-4xl mb-4">💬</div>
+                    <h2 class="text-2xl font-bold text-purple-700 mb-3">Chat with Imam</h2>
+                    <p class="text-gray-600">Have a private conversation with a real Imam</p>
+                    <span class="inline-block mt-3 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">🕌 Real Imam</span>
+                </div>
+            </div>
+
+            <div class="bg-emerald-100 rounded-lg p-8">
+                <h2 class="text-3xl font-bold text-emerald-700 mb-4">About Ramadan Helper</h2>
+                <p class="text-gray-700">Ramadan Helper is designed to support your spiritual journey. We combine Islamic scholarship with AI technology to provide personalized guidance, duas, and resources.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- DUA GENERATOR PAGE -->
+    <div id="dua" class="page">
+        <main class="container mx-auto py-12 px-4">
+            <h1 class="text-4xl font-bold text-emerald-700 mb-8 text-center">Personalized Dua Generator</h1>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold text-emerald-700 mb-6">Tell us your need</h2>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Select Category</label>
+                        <select id="duaCategory" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-emerald-700 outline-none">
+                            <option>Fear & Anxiety</option>
+                            <option>Financial Hardship</option>
+                            <option>Health Issues</option>
+                            <option>Family Problems</option>
+                            <option>Career Guidance</option>
+                            <option>Spiritual Growth</option>
+                            <option>Relationship Issues</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Situation</label>
+                        <textarea id="duaContext" placeholder="Describe your situation in detail..." rows="5" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg resize-none focus:border-emerald-700 outline-none"></textarea>
+                    </div>
+
+                    <button onclick="generateDua()" id="generateDuaBtn" class="w-full px-6 py-4 bg-emerald-700 text-white font-bold rounded-lg hover:bg-emerald-600 text-lg">📿 Generate My Dua</button>
+                </div>
+
+                <div id="duaOutput" class="hidden bg-gradient-to-br from-emerald-50 to-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold text-emerald-700 mb-6">Your Personalized Dua</h2>
+
+                    <div class="mb-6 p-4 bg-white rounded-lg border-l-4 border-emerald-700">
+                        <h3 class="font-semibold text-emerald-700 mb-2">🇬🇧 English</h3>
+                        <p id="duaEn" class="text-gray-800 text-lg italic"></p>
+                    </div>
+
+                    <div class="mb-6 p-4 bg-white rounded-lg border-l-4 border-blue-600 text-right" dir="rtl">
+                        <h3 class="font-semibold text-blue-700 mb-2">🇸🇦 Arabic</h3>
+                        <p id="duaAr" class="text-gray-800 text-lg"></p>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h3 class="font-semibold text-gray-700 mb-2">📖 How to use</h3>
+                        <p id="duaInstructions" class="text-gray-600"></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- AI ANALYZER PAGE -->
+    <div id="analyzer" class="page">
+        <main class="container mx-auto py-12 px-4">
+            <h1 class="text-4xl font-bold text-emerald-700 mb-4 text-center">Ask AI - Islamic Guidance</h1>
+            <p class="text-center text-gray-600 mb-8 text-lg">Get Quran Ayahs & Hadiths with AI explanations</p>
+
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-white rounded-lg shadow p-8 mb-8">
+                    <textarea id="promptInput" placeholder="Ask any Islamic question... (e.g., 'How do I deal with anxiety?' or 'What is the importance of patience?')" class="w-full px-4 py-4 border-2 border-gray-300 rounded-lg focus:border-emerald-700 outline-none resize-none" rows="4"></textarea>
+                    <button onclick="analyzePrompt()" id="analyzeBtn" class="w-full mt-4 px-6 py-4 bg-emerald-700 text-white font-bold text-lg rounded-lg hover:bg-emerald-600">🤖 Analyze with AI</button>
+                </div>
+
+                <div id="analyzerLoading" class="text-center mb-8 hidden">
+                    <div class="inline-block">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-700"></div>
+                        <p class="text-emerald-700 font-semibold mt-2">Analyzing your question...</p>
+                    </div>
+                </div>
+
+                <div id="analyzerResults" class="hidden space-y-6">
+                    <div class="bg-blue-50 rounded-lg shadow p-6">
+                        <h2 class="text-2xl font-bold text-blue-900 mb-4">🤖 AI Analysis</h2>
+                        <p id="aiExplanation" class="text-gray-800 leading-relaxed"></p>
+                    </div>
+
+                    <div class="bg-emerald-50 rounded-lg shadow p-6">
+                        <h2 class="text-2xl font-bold text-emerald-700 mb-4">📖 Quranic Verse</h2>
+                        <div class="bg-white rounded p-4 mb-4">
+                            <p id="ayahArabic" class="text-xl text-gray-800 text-right mb-2" dir="rtl"></p>
+                            <p id="ayahReference" class="text-sm text-emerald-600 font-semibold"></p>
+                        </div>
+                        <p id="ayahTranslation" class="text-gray-700 mb-4"></p>
+                        <p id="ayahExplanation" class="text-gray-600 text-sm"></p>
+                    </div>
+
+                    <div class="bg-orange-50 rounded-lg shadow p-6">
+                        <h2 class="text-2xl font-bold text-orange-800 mb-4">📚 Related Hadith</h2>
+                        <div class="bg-white rounded p-4 mb-4">
+                            <p id="hadithText" class="text-gray-800"></p>
+                            <p id="hadithSource" class="text-sm text-orange-600 font-semibold mt-2"></p>
+                        </div>
+                        <p id="hadithExplanation" class="text-gray-600"></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ISLAMIC VIDEOS PAGE -->
+    <div id="videos" class="page">
+        <main class="container mx-auto py-12 px-4">
+            <h1 class="text-4xl font-bold text-emerald-700 mb-2 text-center">📺 Islamic Videos</h1>
+            <p class="text-center text-gray-600 mb-8 text-lg">Search for Islamic educational videos on YouTube</p>
+
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-white rounded-lg shadow p-8 mb-8">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">What would you like to learn about?</label>
+                    <textarea id="videoSearchPrompt" placeholder="e.g., 'How to improve my prayer concentration', 'Understanding Surah Al-Fatiha', 'Tips for fasting during Ramadan'" class="w-full px-4 py-4 border-2 border-gray-300 rounded-lg focus:border-emerald-700 outline-none resize-none" rows="3"></textarea>
+                    <button onclick="searchIslamicVideos()" id="searchVideoBtn" class="w-full mt-4 px-6 py-4 bg-red-600 text-white font-bold text-lg rounded-lg hover:bg-red-700">🔍 Search Islamic Videos</button>
+                </div>
+
+                <div id="videoLoading" class="text-center mb-8 hidden">
+                    <div class="inline-block">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+                        <p class="text-red-600 font-semibold mt-2">Searching for videos...</p>
+                    </div>
+                </div>
+
+                <div id="videoResults" class="hidden">
+                    <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                        <p class="text-blue-800"><strong>Search:</strong> <span id="videoSearchQuery"></span></p>
+                    </div>
+                    
+                    <div id="videosGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                    
+                    <div id="noVideosMessage" class="hidden bg-yellow-50 border-2 border-yellow-300 rounded-lg p-6 text-center">
+                        <p class="text-yellow-800 font-semibold">No videos found. Try a different search term.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- CHAT WITH IMAM PAGE -->
+    <div id="chat" class="page">
+        <main class="container mx-auto py-12 px-4">
+            <h1 class="text-4xl font-bold text-purple-700 mb-2 text-center">💬 Chat with Imam</h1>
+            <p class="text-center text-gray-600 mb-8 text-lg">Have a private conversation with a real Imam about your questions</p>
+
+            <!-- USER VIEW: Select Imam and Chat -->
+            <div id="userChatView" class="max-w-4xl mx-auto">
+                <!-- Conversations List -->
+                <div id="conversationsList" class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Conversations</h2>
+                    <div id="myConversations" class="space-y-3 mb-6">
+                        <p class="text-gray-500 italic">Loading your conversations...</p>
+                    </div>
+                    <button onclick="showNewConversationForm()" id="newConvoBtn" class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700">➕ Start New Conversation</button>
+                </div>
+
+                <!-- New Conversation Form -->
+                <div id="newConversationForm" class="hidden bg-white rounded-lg shadow p-6 mb-8">
+                    <h3 class="text-xl font-bold text-purple-700 mb-4">Start a New Conversation</h3>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Select an Imam</label>
+                        <select id="imamSelect" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none">
+                            <option value="">-- Select an Imam --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Topic / Subject</label>
+                        <input type="text" id="conversationTopic" placeholder="e.g., Marriage advice, Prayer questions, Fasting guidance..." class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Initial Message</label>
+                        <textarea id="initialMessage" placeholder="Write your question or concern here..." rows="4" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none resize-none"></textarea>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="startConversation()" class="flex-1 px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700">📨 Send to Imam</button>
+                        <button onclick="hideNewConversationForm()" class="px-6 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Active Chat Interface -->
+                <div id="chatInterface" class="hidden bg-white rounded-lg shadow overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 id="chatImamName" class="font-bold text-lg">Imam Name</h3>
+                                <p id="chatTopic" class="text-purple-200 text-sm">Topic</p>
+                            </div>
+                            <button onclick="closeChat()" class="px-4 py-2 bg-white/20 rounded hover:bg-white/30">← Back</button>
+                        </div>
+                    </div>
+                    
+                    <div id="messagesContainer" class="h-96 overflow-y-auto p-4 bg-gray-50">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                    
+                    <div class="p-4 bg-white border-t">
+                        <div class="flex gap-3">
+                            <textarea id="messageInput" placeholder="Type your message..." rows="2" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 outline-none resize-none"></textarea>
+                            <button onclick="sendMessage()" class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700">Send 📤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IMAM VIEW: Dashboard -->
+            <div id="imamChatView" class="hidden max-w-4xl mx-auto">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg p-6 mb-8">
+                    <h2 class="text-2xl font-bold mb-2">🕌 Imam Dashboard</h2>
+                    <p class="text-blue-100">View and respond to user conversations</p>
+                </div>
+
+                <div id="imamConversationsList" class="space-y-4">
+                    <p class="text-gray-500 italic">Loading conversations...</p>
+                </div>
+
+                <!-- Imam Chat Interface -->
+                <div id="imamChatInterface" class="hidden bg-white rounded-lg shadow overflow-hidden mt-8">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 id="imamChatUserEmail" class="font-bold text-lg">User Email</h3>
+                                <p id="imamChatTopic" class="text-blue-200 text-sm">Topic</p>
+                            </div>
+                            <button onclick="closeImamChat()" class="px-4 py-2 bg-white/20 rounded hover:bg-white/30">← Back</button>
+                        </div>
+                    </div>
+                    
+                    <div id="imamMessagesContainer" class="h-96 overflow-y-auto p-4 bg-gray-50">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                    
+                    <div class="p-4 bg-white border-t">
+                        <div class="flex gap-3">
+                            <textarea id="imamMessageInput" placeholder="Type your response..." rows="2" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none resize-none"></textarea>
+                            <button onclick="sendImamMessage()" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Reply 📤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p>© 2026 Ramadan Helper. May Allah accept from us. 🌙</p>
+    </footer>
+
+    <script>
+        // ============= CONFIGURATION =============
+        const API_BASE_URL = "http://localhost:8000/api";
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        let currentImam = JSON.parse(localStorage.getItem('currentImam')) || null;
+        let userEmail = localStorage.getItem('userEmail') || '';
+
+        // ============= INITIALIZATION =============
+        document.addEventListener('DOMContentLoaded', function() {
+            initLogin();
+            checkBackendStatus();
+        });
+
+        // ============= BACKEND STATUS =============
+        async function checkBackendStatus() {
+            const indicator = document.getElementById('statusIndicator');
+            try {
+                const response = await fetch('http://localhost:8000/', { method: 'GET' });
+                if (response.ok) {
+                    indicator.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-800';
+                    indicator.innerHTML = '<span class="text-green-500">●</span> All services online';
+                }
+            } catch (error) {
+                indicator.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 text-red-800';
+                indicator.innerHTML = '<span class="text-red-500">●</span> Backend offline - Start backend server';
+            }
+        }
+
+        // ============= LOGIN SYSTEM =============
+        function initLogin() {
+            const loginModal = document.getElementById('loginModal');
+            const loginTypeSelection = document.getElementById('loginTypeSelection');
+            const userLoginForm = document.getElementById('userLoginForm');
+            const imamLoginForm = document.getElementById('imamLoginForm');
+
+            // Check if already logged in
+            if (currentUser || currentImam) {
+                loginModal.style.display = 'none';
+                document.getElementById('userProfileHeader').classList.remove('hidden');
+                if (currentUser) {
+                    document.getElementById('userTypeDisplay').textContent = '👤 User';
+                    document.getElementById('userNameDisplay').textContent = currentUser.name || currentUser.email;
+                    userEmail = currentUser.email;
+                }
+                if (currentImam) {
+                    document.getElementById('userTypeDisplay').textContent = '🕌 Imam';
+                    document.getElementById('userNameDisplay').textContent = currentImam.name;
+                }
+                return;
+            }
+
+            // Button handlers
+            document.getElementById('btnUserLogin').onclick = () => {
+                loginTypeSelection.style.display = 'none';
+                userLoginForm.style.display = 'block';
+            };
+
+            document.getElementById('btnImamLogin').onclick = () => {
+                loginTypeSelection.style.display = 'none';
+                imamLoginForm.style.display = 'block';
+            };
+
+            document.getElementById('btnBackFromUser').onclick = () => {
+                loginTypeSelection.style.display = 'block';
+                userLoginForm.style.display = 'none';
+            };
+
+            document.getElementById('btnBackFromImam').onclick = () => {
+                loginTypeSelection.style.display = 'block';
+                imamLoginForm.style.display = 'none';
+            };
+
+            document.getElementById('btnSubmitUserLogin').onclick = async () => {
+                const email = document.getElementById('userEmailInput').value.trim();
+                const name = document.getElementById('userNameInput').value.trim() || email.split('@')[0];
+                const errorEl = document.getElementById('userEmailError');
+                const statusEl = document.getElementById('userLoginStatus');
+
+                if (!email || !email.includes('@') || !email.includes('.')) {
+                    errorEl.textContent = 'Please enter a valid email address';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                // Validate email domain
+                const domain = email.split('@')[1].toLowerCase();
+                const fakeDomains = ['test.com', 'example.com', 'fake.com', 'mailinator.com'];
+                if (fakeDomains.includes(domain)) {
+                    errorEl.textContent = 'Please use a real email address';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                errorEl.style.display = 'none';
+                statusEl.style.display = 'block';
+                statusEl.style.background = '#d1fae5';
+                statusEl.style.color = '#047857';
+                statusEl.textContent = '✅ Login successful!';
+
+                currentUser = { type: 'user', email, name, loginTime: new Date().toISOString() };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                localStorage.setItem('userEmail', email);
+                userEmail = email;
+
+                setTimeout(() => {
+                    loginModal.style.display = 'none';
+                    document.getElementById('userProfileHeader').classList.remove('hidden');
+                    document.getElementById('userTypeDisplay').textContent = '👤 User';
+                    document.getElementById('userNameDisplay').textContent = name;
+                }, 500);
+            };
+
+            document.getElementById('btnSubmitImamLogin').onclick = async () => {
+                const name = document.getElementById('imamNameInput').value.trim();
+                const email = document.getElementById('imamEmailInput').value.trim();
+                const password = document.getElementById('imamPasswordInput').value.trim();
+                const statusEl = document.getElementById('imamLoginStatus');
+
+                if (!name || !email || !password) {
+                    statusEl.style.display = 'block';
+                    statusEl.style.background = '#fee2e2';
+                    statusEl.style.color = '#dc2626';
+                    statusEl.textContent = '❌ Please fill all fields';
+                    return;
+                }
+
+                statusEl.style.display = 'block';
+                statusEl.style.background = '#dbeafe';
+                statusEl.style.color = '#1d4ed8';
+                statusEl.textContent = '✅ Login successful!';
+
+                currentImam = { type: 'imam', name, email, loginTime: new Date().toISOString() };
+                localStorage.setItem('currentImam', JSON.stringify(currentImam));
+
+                setTimeout(() => {
+                    loginModal.style.display = 'none';
+                    document.getElementById('userProfileHeader').classList.remove('hidden');
+                    document.getElementById('userTypeDisplay').textContent = '🕌 Imam';
+                    document.getElementById('userNameDisplay').textContent = name;
+                }, 500);
+            };
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('currentImam');
+                localStorage.removeItem('userEmail');
+                location.reload();
+            }
+        }
+
+        // ============= PAGE NAVIGATION =============
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+            
+            // Initialize chat when showing chat page
+            if (pageId === 'chat') {
+                initChat();
+            }
+        }
+
+        // ============= DUA GENERATOR =============
+        async function generateDua() {
+            const category = document.getElementById('duaCategory').value;
+            const context = document.getElementById('duaContext').value.trim();
+            const btn = document.getElementById('generateDuaBtn');
+            const output = document.getElementById('duaOutput');
+
+            if (!context) {
+                alert('Please describe your situation');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating...';
+            output.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/dua/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail || 'guest@app.local', category, context })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('duaEn').textContent = data.dua_text_en;
+                    document.getElementById('duaAr').textContent = data.dua_text_ar;
+                    document.getElementById('duaInstructions').textContent = data.how_to_use_en || 'Recite with sincerity and focus.';
+                    output.classList.remove('hidden');
+                } else {
+                    throw new Error('API error');
+                }
+            } catch (error) {
+                alert('Error generating dua. Make sure backend is running.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📿 Generate My Dua';
+            }
+        }
+
+        // ============= AI ANALYZER =============
+        async function analyzePrompt() {
+            const prompt = document.getElementById('promptInput').value.trim();
+            const btn = document.getElementById('analyzeBtn');
+            const loading = document.getElementById('analyzerLoading');
+            const results = document.getElementById('analyzerResults');
+
+            if (!prompt) {
+                alert('Please enter your question');
+                return;
+            }
+
+            btn.disabled = true;
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/analyzer/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail || 'guest@app.local', question: prompt })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    document.getElementById('aiExplanation').textContent = data.ai_explanation;
+                    document.getElementById('ayahArabic').textContent = data.ayah.arabic;
+                    document.getElementById('ayahReference').textContent = '📍 ' + data.ayah.reference;
+                    document.getElementById('ayahTranslation').textContent = data.ayah.translation;
+                    document.getElementById('ayahExplanation').textContent = data.ayah.explanation;
+                    document.getElementById('hadithText').textContent = data.hadith.text;
+                    document.getElementById('hadithSource').textContent = '📚 ' + data.hadith.narrator;
+                    document.getElementById('hadithExplanation').textContent = data.hadith.explanation;
+                    
+                    results.classList.remove('hidden');
+                } else {
+                    throw new Error('API error');
+                }
+            } catch (error) {
+                alert('Error analyzing question. Make sure backend is running.');
+            } finally {
+                btn.disabled = false;
+                loading.classList.add('hidden');
+            }
+        }
+
+        // ============= VIDEO SEARCH (Direct YouTube) =============
+        async function searchIslamicVideos() {
+            const prompt = document.getElementById('videoSearchPrompt').value.trim();
+            const btn = document.getElementById('searchVideoBtn');
+            const loading = document.getElementById('videoLoading');
+            const results = document.getElementById('videoResults');
+            const grid = document.getElementById('videosGrid');
+            const noVideos = document.getElementById('noVideosMessage');
+
+            if (!prompt) {
+                alert('Please describe what you want to learn about');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Searching...';
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            try {
+                // First, try to get AI-generated search keywords from backend
+                let searchQuery = prompt + ' Islamic lecture';
+                
+                try {
+                    const aiResponse = await fetch(`${API_BASE_URL}/videos/search-by-prompt`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: userEmail || 'guest@app.local', prompt })
+                    });
+                    
+                    if (aiResponse.ok) {
+                        const aiData = await aiResponse.json();
+                        searchQuery = aiData.search_query || searchQuery;
+                    }
+                } catch (e) {
+                    console.log('Using default search query');
+                }
+
+                document.getElementById('videoSearchQuery').textContent = searchQuery;
+
+                // Use YouTube search URL approach - display video cards that link to YouTube search
+                const islamicChannels = [
+                    { name: 'Mufti Menk', query: searchQuery + ' Mufti Menk' },
+                    { name: 'Omar Suleiman', query: searchQuery + ' Omar Suleiman' },
+                    { name: 'Nouman Ali Khan', query: searchQuery + ' Nouman Ali Khan' },
+                    { name: 'Yasir Qadhi', query: searchQuery + ' Yasir Qadhi' },
+                    { name: 'Islamic Guidance', query: searchQuery + ' Islamic lecture' },
+                    { name: 'FreeQuranEducation', query: searchQuery + ' Quran' }
+                ];
+
+                grid.innerHTML = islamicChannels.map(channel => `
+                    <div class="bg-white rounded-lg shadow hover:shadow-lg overflow-hidden">
+                        <div class="bg-gradient-to-br from-red-600 to-red-700 h-32 flex items-center justify-center">
+                            <span class="text-6xl">📺</span>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-gray-900 mb-2">${channel.name}</h3>
+                            <p class="text-sm text-gray-600 mb-4">Search for: "${prompt}"</p>
+                            <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(channel.query)}" 
+                               target="_blank" 
+                               class="block w-full text-center px-4 py-3 bg-red-600 text-white font-semibold rounded hover:bg-red-700">
+                                🔍 Search on YouTube
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+
+                noVideos.classList.add('hidden');
+                results.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error searching videos');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔍 Search Islamic Videos';
+                loading.classList.add('hidden');
+            }
+        }
+
+        // ============= CHAT WITH IMAM =============
+        let currentConversationId = null;
+        let availableImams = [];
+
+        // Initialize chat when page is shown
+        function initChat() {
+            if (currentImam) {
+                // Imam view
+                document.getElementById('userChatView').classList.add('hidden');
+                document.getElementById('imamChatView').classList.remove('hidden');
+                loadImamConversations();
+            } else {
+                // User view
+                document.getElementById('userChatView').classList.remove('hidden');
+                document.getElementById('imamChatView').classList.add('hidden');
+                loadImams();
+                loadUserConversations();
+            }
+        }
+
+        // Load available imams
+        async function loadImams() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/imams`);
+                if (response.ok) {
+                    availableImams = await response.json();
+                    const select = document.getElementById('imamSelect');
+                    select.innerHTML = '<option value="">-- Select an Imam --</option>' + 
+                        availableImams.map(imam => `
+                            <option value="${imam.id}">${imam.name} - ${imam.expertise}</option>
+                        `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading imams:', error);
+            }
+        }
+
+        // Load user's conversations
+        async function loadUserConversations() {
+            const container = document.getElementById('myConversations');
+            try {
+                const response = await fetch(`${API_BASE_URL}/chat/conversations/${encodeURIComponent(userEmail || 'guest@app.local')}`);
+                if (response.ok) {
+                    const conversations = await response.json();
+                    if (conversations.length === 0) {
+                        container.innerHTML = '<p class="text-gray-500 italic">No conversations yet. Start a new conversation with an Imam!</p>';
+                    } else {
+                        container.innerHTML = conversations.map(conv => `
+                            <div onclick="openConversation(${conv.id}, '${conv.imam_name}', '${conv.topic}')" 
+                                 class="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-lg border-l-4 border-purple-500">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-purple-700">${conv.imam_name}</h4>
+                                        <p class="text-gray-600">${conv.topic}</p>
+                                        <p class="text-xs text-gray-400 mt-1">Last updated: ${new Date(conv.updated_at).toLocaleString()}</p>
+                                    </div>
+                                    <span class="text-purple-500 text-2xl">💬</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                container.innerHTML = '<p class="text-red-500">Error loading conversations</p>';
+            }
+        }
+
+        // Load conversations for imam
+        async function loadImamConversations() {
+            const container = document.getElementById('imamConversationsList');
+            try {
+                const response = await fetch(`${API_BASE_URL}/chat/all-conversations`);
+                if (response.ok) {
+                    const conversations = await response.json();
+                    if (conversations.length === 0) {
+                        container.innerHTML = '<div class="bg-white rounded-lg shadow p-6 text-center"><p class="text-gray-500">No conversations yet. Users will be able to message you here.</p></div>';
+                    } else {
+                        container.innerHTML = conversations.map(conv => `
+                            <div onclick="openImamConversation(${conv.id}, '${conv.user_email}', '${conv.topic}')" 
+                                 class="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-lg border-l-4 ${conv.unread_count > 0 ? 'border-red-500' : 'border-blue-500'}">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-blue-700">${conv.user_email}</h4>
+                                        <p class="text-gray-600">${conv.topic}</p>
+                                        <p class="text-xs text-gray-400 mt-1">Last updated: ${new Date(conv.updated_at).toLocaleString()}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        ${conv.unread_count > 0 ? `<span class="bg-red-500 text-white px-2 py-1 rounded-full text-xs">${conv.unread_count} new</span>` : ''}
+                                        <span class="text-blue-500 text-2xl block mt-2">💬</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                container.innerHTML = '<p class="text-red-500">Error loading conversations</p>';
+            }
+        }
+
+        function showNewConversationForm() {
+            document.getElementById('newConversationForm').classList.remove('hidden');
+            document.getElementById('newConvoBtn').classList.add('hidden');
+        }
+
+        function hideNewConversationForm() {
+            document.getElementById('newConversationForm').classList.add('hidden');
+            document.getElementById('newConvoBtn').classList.remove('hidden');
+        }
+
+        // Start a new conversation
+        async function startConversation() {
+            const imamId = document.getElementById('imamSelect').value;
+            const topic = document.getElementById('conversationTopic').value.trim();
+            const message = document.getElementById('initialMessage').value.trim();
+
+            if (!imamId) { alert('Please select an Imam'); return; }
+            if (!topic) { alert('Please enter a topic'); return; }
+            if (!message) { alert('Please write your initial message'); return; }
+
+            try {
+                // Create conversation
+                const convResponse = await fetch(`${API_BASE_URL}/chat/conversations`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_email: userEmail || 'guest@app.local',
+                        imam_id: parseInt(imamId),
+                        topic: topic
+                    })
+                });
+
+                if (convResponse.ok) {
+                    const conv = await convResponse.json();
+                    
+                    // Send initial message
+                    await fetch(`${API_BASE_URL}/chat/messages`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            conversation_id: conv.id,
+                            sender_email: userEmail || 'guest@app.local',
+                            sender_type: 'user',
+                            message_text: message
+                        })
+                    });
+
+                    // Clear form and reload
+                    document.getElementById('conversationTopic').value = '';
+                    document.getElementById('initialMessage').value = '';
+                    document.getElementById('imamSelect').value = '';
+                    hideNewConversationForm();
+                    loadUserConversations();
+
+                    // Open the new conversation
+                    const imam = availableImams.find(i => i.id === parseInt(imamId));
+                    openConversation(conv.id, imam ? imam.name : 'Imam', topic);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error starting conversation');
+            }
+        }
+
+        // Open user conversation
+        async function openConversation(conversationId, imamName, topic) {
+            currentConversationId = conversationId;
+            document.getElementById('chatImamName').textContent = '🕌 ' + imamName;
+            document.getElementById('chatTopic').textContent = topic;
+            
+            document.getElementById('conversationsList').classList.add('hidden');
+            document.getElementById('newConversationForm').classList.add('hidden');
+            document.getElementById('chatInterface').classList.remove('hidden');
+
+            await loadMessages(conversationId, 'messagesContainer');
+        }
+
+        // Open imam conversation
+        async function openImamConversation(conversationId, userEmail, topic) {
+            currentConversationId = conversationId;
+            document.getElementById('imamChatUserEmail').textContent = '👤 ' + userEmail;
+            document.getElementById('imamChatTopic').textContent = topic;
+            
+            document.getElementById('imamConversationsList').classList.add('hidden');
+            document.getElementById('imamChatInterface').classList.remove('hidden');
+
+            await loadMessages(conversationId, 'imamMessagesContainer');
+        }
+
+        // Load messages for a conversation
+        async function loadMessages(conversationId, containerId) {
+            const container = document.getElementById(containerId);
+            try {
+                const response = await fetch(`${API_BASE_URL}/chat/messages/${conversationId}`);
+                if (response.ok) {
+                    const messages = await response.json();
+                    container.innerHTML = messages.map(msg => `
+                        <div class="mb-4 ${msg.sender_type === 'user' ? 'text-right' : 'text-left'}">
+                            <div class="inline-block max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
+                                msg.sender_type === 'user' 
+                                    ? 'bg-purple-600 text-white' 
+                                    : 'bg-white shadow border border-gray-200 text-gray-800'
+                            }">
+                                <p class="text-sm">${msg.message_text}</p>
+                                <p class="text-xs mt-1 ${msg.sender_type === 'user' ? 'text-purple-200' : 'text-gray-400'}">
+                                    ${new Date(msg.created_at).toLocaleString()}
+                                </p>
+                            </div>
+                        </div>
+                    `).join('');
+                    container.scrollTop = container.scrollHeight;
+                }
+            } catch (error) {
+                container.innerHTML = '<p class="text-red-500 text-center">Error loading messages</p>';
+            }
+        }
+
+        // Send message as user
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message || !currentConversationId) return;
+
+            try {
+                await fetch(`${API_BASE_URL}/chat/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        conversation_id: currentConversationId,
+                        sender_email: userEmail || 'guest@app.local',
+                        sender_type: 'user',
+                        message_text: message
+                    })
+                });
+                input.value = '';
+                await loadMessages(currentConversationId, 'messagesContainer');
+            } catch (error) {
+                alert('Error sending message');
+            }
+        }
+
+        // Send message as imam
+        async function sendImamMessage() {
+            const input = document.getElementById('imamMessageInput');
+            const message = input.value.trim();
+            if (!message || !currentConversationId) return;
+
+            try {
+                await fetch(`${API_BASE_URL}/chat/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        conversation_id: currentConversationId,
+                        sender_email: currentImam.email,
+                        sender_type: 'imam',
+                        message_text: message
+                    })
+                });
+                input.value = '';
+                await loadMessages(currentConversationId, 'imamMessagesContainer');
+            } catch (error) {
+                alert('Error sending message');
+            }
+        }
+
+        function closeChat() {
+            document.getElementById('chatInterface').classList.add('hidden');
+            document.getElementById('conversationsList').classList.remove('hidden');
+            document.getElementById('newConvoBtn').classList.remove('hidden');
+            currentConversationId = null;
+            loadUserConversations();
+        }
+
+        function closeImamChat() {
+            document.getElementById('imamChatInterface').classList.add('hidden');
+            document.getElementById('imamConversationsList').classList.remove('hidden');
+            currentConversationId = null;
+            loadImamConversations();
+        }
+    </script>
+</body>
+</html>
