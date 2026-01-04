@@ -382,13 +382,28 @@
 
     <script>
         // ============= CONFIGURATION =============
-        const API_BASE_URL = "http://localhost:8000/api";
+        // Auto-detect: use deployed backend if not running locally
+        const DEPLOYED_BACKEND = "https://ramadan-helper-api.onrender.com/api";
+        const LOCAL_BACKEND = "http://localhost:8000/api";
+        let API_BASE_URL = LOCAL_BACKEND; // Will be updated after checking
+        
         let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
         let currentImam = JSON.parse(localStorage.getItem('currentImam')) || null;
         let userEmail = localStorage.getItem('userEmail') || '';
 
         // ============= INITIALIZATION =============
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Try local first, fallback to deployed
+            try {
+                const localCheck = await fetch('http://localhost:8000/', { method: 'GET', signal: AbortSignal.timeout(2000) });
+                if (localCheck.ok) {
+                    API_BASE_URL = LOCAL_BACKEND;
+                    console.log('Using local backend');
+                }
+            } catch (e) {
+                API_BASE_URL = DEPLOYED_BACKEND;
+                console.log('Using deployed backend');
+            }
             initLogin();
             checkBackendStatus();
         });
@@ -396,15 +411,16 @@
         // ============= BACKEND STATUS =============
         async function checkBackendStatus() {
             const indicator = document.getElementById('statusIndicator');
+            const backendUrl = API_BASE_URL.replace('/api', '');
             try {
-                const response = await fetch('http://localhost:8000/', { method: 'GET' });
+                const response = await fetch(backendUrl + '/', { method: 'GET' });
                 if (response.ok) {
                     indicator.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-800';
                     indicator.innerHTML = '<span class="text-green-500">●</span> All services online';
                 }
             } catch (error) {
-                indicator.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 text-red-800';
-                indicator.innerHTML = '<span class="text-red-500">●</span> Backend offline - Start backend server';
+                indicator.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-100 text-yellow-800';
+                indicator.innerHTML = '<span class="text-yellow-500">●</span> Connecting to server...';
             }
         }
 
