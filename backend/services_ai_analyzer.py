@@ -256,6 +256,14 @@ class AIAnalyzerService:
             "narrator": "Sahih Bukhari & Muslim",
             "explanation": "The Prophet emphasized the immense importance of treating neighbors with kindness and respect.",
             "keywords": ["neighbor", "neighbors", "community", "kindness", "respect", "rights"]
+        },
+        {
+            "id": 14,
+            "text_en": "Allah says: O son of Adam, if your sins were to reach the clouds of the sky, then you sought forgiveness from Me, I would forgive you.",
+            "text_ar": "يا ابن آدم لو بلغت ذنوبك عنان السماء ثم استغفرتني غفرت لك",
+            "narrator": "At-Tirmidhi",
+            "explanation": "No matter how many sins you have committed, Allah's mercy is always greater. Seek forgiveness sincerely.",
+            "keywords": ["forgiveness", "tawba", "repentance", "sin", "mercy", "guilt", "mistake", "regret"]
         }
     ]
 
@@ -428,6 +436,48 @@ IMPORTANT: Return ONLY valid JSON, no markdown or extra text."""
             return AIAnalyzerService.get_default_response()
 
     @staticmethod
+    async def analyze_with_semantic_search(user_prompt: str) -> dict:
+        """Use semantic search to find the most relevant Quran verse"""
+        from services_quran_semantic import QuranSemanticSearch
+        
+        # Check safety layer
+        if not QuranSemanticSearch.is_safe_match(user_prompt):
+            return {
+                "response": "SAFETY_CHECK",
+                "message": "We cannot provide guidance on that topic. Please ask about Islamic teachings on positive topics.",
+                "ayah": None,
+                "hadith": None,
+                "ai_generated": False
+            }
+        
+        # Find the most semantically similar verse
+        best_match = QuranSemanticSearch.find_best_verse(user_prompt)
+        
+        if not best_match:
+            return {
+                "response": "LOW_CONFIDENCE",
+                "message": "Your question doesn't match any verses closely. Try rewording your question.",
+                "ayah": None,
+                "hadith": None,
+                "ai_generated": False
+            }
+        
+        # Return just the verse (no AI explanation, no hadith)
+        return {
+            "ayah": {
+                "reference": best_match["ref"],
+                "surah_number": best_match["surah"],
+                "ayah_number": best_match["ayah"],
+                "translation": best_match["text_en"],
+                "similarity_score": best_match["similarity_score"]
+            },
+            "hadith": None,
+            "ai_explanation": None,
+            "ai_generated": False,
+            "source": "semantic_search"
+        }
+
+    @staticmethod
     async def analyze_with_full_quran(user_prompt: str) -> dict:
         """
         Enhanced AI analysis using the full Quran database via API
@@ -443,39 +493,88 @@ IMPORTANT: Return ONLY valid JSON, no markdown or extra text."""
             return await AIAnalyzerService.analyze_prompt_with_ai(user_prompt)
         
         # First, use AI to identify the best verse reference
-        system_prompt = """You are an expert Islamic scholar AI. Your task is to recommend the MOST RELEVANT Quranic verse for the user's question.
+        system_prompt = """You are an expert Islamic scholar AI. Your task is to recommend the MOST RELEVANT Quranic verse AND matching Hadith for the user's question.
 
-You have access to the ENTIRE Quran (114 Surahs, 6236 verses). Choose the verse that best addresses their concern.
+You have access to the ENTIRE Quran (114 Surahs, 6236 verses). Choose the verse that DIRECTLY addresses their concern.
 
-POPULAR VERSE REFERENCES BY TOPIC:
-- Patience/Hardship: 2:155, 94:5-6, 2:286, 3:139
-- Marriage/Spouse: 4:19, 30:21, 2:187, 25:74
-- Money/Provision: 65:2-3, 2:155, 51:22, 2:261
-- Parents/Family: 17:23-24, 31:14, 46:15, 4:36
-- Prayer/Dua: 2:186, 40:60, 2:45, 7:55-56
-- Forgiveness/Sin: 39:53, 4:110, 3:135, 25:70
-- Anger: 3:134, 41:34, 7:199
-- Anxiety/Fear: 2:286, 13:28, 94:5-6
-- Hope: 39:53, 12:87, 93:4-5
-- Death: 3:185, 29:57
-- Success: 23:1, 91:9, 3:104
-- Brotherhood: 49:10, 3:103
-- Justice: 4:135, 5:8, 16:90
+=== BEST VERSE REFERENCES BY TOPIC ===
+ANGER/EMOTIONS:
+- 3:134 (Those who restrain anger and pardon people)
+- 41:34 (Repel evil with good)
+- 7:199 (Take what is given freely, enjoin good, turn away from ignorant)
 
-RESPONSE FORMAT (JSON only):
+MARRIAGE/SPOUSE/WIFE/HUSBAND:
+- 30:21 (He created mates for you to find tranquility - BEST for marriage)
+- 4:19 (Live with wives in kindness)
+- 2:187 (They are clothing for you and you for them)
+- 25:74 (Grant us spouses who are comfort to our eyes)
+
+MONEY/POVERTY/FINANCIAL/PROVISION/RIZQ:
+- 65:3 (Whoever fears Allah, He will provide from unexpected sources - BEST for money)
+- 2:261 (Those who spend in Allah's cause multiply their reward)
+- 51:22 (In heaven is your provision)
+- 2:155 (We test you with loss of wealth)
+
+PATIENCE/HARDSHIP/DIFFICULTY:
+- 94:5-6 (With hardship comes ease - BEST for hardship)
+- 2:155 (We test you with fear, hunger, loss)
+- 2:286 (Allah does not burden a soul beyond capacity)
+- 3:139 (Do not lose hope)
+
+PARENTS/FAMILY/MOTHER/FATHER:
+- 17:23-24 (Be kind to parents, lower the wing of humility)
+- 31:14 (Be grateful to parents)
+- 46:15 (Kindness to parents)
+
+FORGIVENESS/SIN/REPENTANCE:
+- 39:53 (Do not despair of Allah's mercy - BEST for forgiveness)
+- 4:110 (Whoever does wrong then seeks forgiveness)
+- 25:70 (Allah will change sins to good deeds)
+
+SADNESS/DEPRESSION/ANXIETY/WORRY:
+- 94:5-6 (With hardship comes ease)
+- 13:28 (Hearts find rest in remembrance of Allah)
+- 93:3-5 (Your Lord has not forsaken you)
+- 12:87 (Never despair of Allah's mercy)
+
+PRAYER/DUA:
+- 2:186 (I respond to the caller when he calls)
+- 40:60 (Call upon Me, I will respond)
+
+=== HADITH IDS AND THEIR TOPICS ===
+ID 1: Marriage/Wife/Spouse - "Best of you are best to wives"
+ID 2: Brotherhood/Community - "Love for brother what you love for yourself"  
+ID 3: ANGER - "Strongest is one who controls anger" (USE FOR ANGER!)
+ID 4: Speech/Words - "Speak good or remain silent"
+ID 5: Money/Poverty/Wealth - "True richness is richness of soul" (USE FOR MONEY!)
+ID 6: Money/Gratitude - "Look at those below you"
+ID 7: Charity/Helping - "Best deed is to bring joy to Muslim's heart"
+ID 8: Patience/Hardship - "Patience is light" (USE FOR HARDSHIP!)
+ID 9: Helping others - "Relieve hardship, Allah relieves yours"
+ID 10: Brotherhood - "Muslim is brother of Muslim"
+ID 11: Parents/Mother - "Paradise under feet of mothers" (USE FOR PARENTS!)
+ID 12: Hardship/Ease - "With hardship comes ease"
+ID 13: Neighbors - "Jibreel advised about neighbors"
+ID 14: FORGIVENESS/SIN/REPENTANCE - "Allah forgives sins reaching the sky" (USE FOR FORGIVENESS!)
+
+=== YOUR RESPONSE (JSON only) ===
 {
-    "verse_ref": "<surah_number>:<ayah_number>",
-    "topic_identified": "<main topic from user's question>",
-    "hadith_id": <1-13>,
-    "ai_explanation": "<Personalized 2-3 sentence guidance connecting the verse to their question>"
+    "verse_ref": "<surah:ayah>",
+    "topic_identified": "<topic>",
+    "hadith_id": <number 1-14>,
+    "ai_explanation": "<2-3 sentences connecting verse+hadith to their question>"
 }
 
-IMPORTANT:
-- Use format like "2:155" for single verse or "94:5-6" for range
-- Choose hadith_id from 1-13 that complements the verse
-- Return ONLY valid JSON"""
+CRITICAL MATCHING RULES:
+- ANGER questions → verse 3:134 + hadith_id 3
+- MARRIAGE/WIFE questions → verse 30:21 + hadith_id 1
+- MONEY/POVERTY questions → verse 65:3 + hadith_id 5
+- PATIENCE/HARDSHIP → verse 94:5-6 + hadith_id 8 or 12
+- PARENTS/MOTHER → verse 17:23-24 + hadith_id 11
+- SADNESS/DEPRESSION → verse 94:5-6 or 13:28 + hadith_id 8
+- FORGIVENESS/SIN/GUILT → verse 39:53 + hadith_id 14"""
 
-        user_message = f"User's question: \"{user_prompt}\"\n\nRecommend the most relevant Quran verse."
+        user_message = f"User's question: \"{user_prompt}\"\n\nChoose the BEST matching verse and hadith. Return JSON only."
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -518,7 +617,8 @@ IMPORTANT:
                     
                     verse_ref = data.get("verse_ref", "2:155")
                     topic = data.get("topic_identified", "general guidance")
-                    hadith_id = int(data.get("hadith_id", 1))
+                    hadith_id_raw = data.get("hadith_id")
+                    hadith_id = int(hadith_id_raw) if hadith_id_raw is not None else 1
                     ai_explanation = data.get("ai_explanation", "")
                     
                     # Fetch the actual verse from Quran API
