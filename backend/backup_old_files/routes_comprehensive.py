@@ -1,11 +1,11 @@
-"""
+﻿"""
 Complete API Routes for Ramadan Helper
-Includes: Users, Dua, Chat, AI Analyzer, Videos, History
+Includes: Users, Signup, Verification, Dua, Chat, AI Analyzer, Videos, History
 """
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from database import SessionLocal
 
@@ -14,8 +14,9 @@ from services_chat import ChatService
 from services_analyzer import AnalyzerService
 from services_ai_analyzer import AIAnalyzerService
 from services_youtube_ai import YouTubeAIService
+from services_email import EmailService
 from models_extended import (
-    User, DuaHistory, Imam, Conversation, Message, 
+    User, DuaHistory, Imam, Conversation, Message,
     Video, AIAnalysis, UserHistory
 )
 
@@ -30,16 +31,31 @@ def get_db():
         db.close()
 
 # ============= PYDANTIC MODELS =============
+class UserSignupRequest(BaseModel):
+    email: str
+    name: str
+    password: str
+    user_type: str = "user"
+
 class UserLoginRequest(BaseModel):
     email: str
+    password: Optional[str] = None
     name: Optional[str] = None
     user_type: str = "user"
+
+class VerifyEmailRequest(BaseModel):
+    email: str
+    code: str
+
+class ResendCodeRequest(BaseModel):
+    email: str
 
 class UserResponse(BaseModel):
     id: int
     email: str
     name: Optional[str]
     user_type: str
+    is_verified: bool = False
     class Config:
         from_attributes = True
 
@@ -78,7 +94,7 @@ class ConversationCreateRequest(BaseModel):
 class MessageSendRequest(BaseModel):
     conversation_id: int
     sender_email: str
-    sender_type: str  # "user" or "imam"
+    sender_type: str
     message_text: str
 
 class MessageResponse(BaseModel):
@@ -116,29 +132,174 @@ class DuaFeedbackRequest(BaseModel):
     helpful: bool
     notes: Optional[str] = ""
 
-# ============= USER ENDPOINTS =============
-@router.post("/users/login", response_model=UserResponse)
-def user_login(request: UserLoginRequest, db: Session = Depends(get_db)):
-    """Login/Register user"""
+# ============= SIGNUP & AUTH ENDPOINTS =============
+@router.post("/users/signup")
+def user_signup(request: UserSignupRequest, db: Session = Depends(get_db)):
+    """Register a new user with email verification"""
+    # Check if user already exists
+    existing_user = db.query(User).filter(User.email == request.email).first()
+    if existing_user:
+        if existing_user.is_verified:
+            raise HTTPException(status_code=400, detail="Email already registered. Please login.")
+        else:
+            # User exists but not verified - regenerate code
+            existing_user.verification_code = User.generate_verification_code()
+            existing_user.name = request.name
+            existing_user.password_hash = User.hash_password(request.password)
+            db.commit()
+            # Send email with new code
+            email_sent = EmailService.send_verification_email(
+                to_email=request.email,
+                verification_code=existing_user.verification_code,
+                user_name=existing_user.name
+            )
+            response = {
+                "status": "pending_verification",
+                "message": "New verification code sent to your email.",
+                "email": request.email,
+                "email_sent": email_sent
+            }
+            if not EmailService.is_configured():
+                response["verification_code"] = existing_user.verification_code
+            return response
+    
+    # Create new user
+    verification_code = User.generate_verification_code()
+    user = User(
+        email=request.email,
+        name=request.name,
+        password_hash=User.hash_password(request.password),
+        user_type=request.user_type,
+        is_verified=False,
+        verification_code=verification_code,
+        verification_token=User.generate_token()
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    
+    # Send verification email
+    email_sent = EmailService.send_verification_email(
+        to_email=user.email,
+        verification_code=verification_code,
+        user_name=user.name
+    )
+    
+    response = {
+        "status": "pending_verification",
+        "message": "Account created! Check your email for the verification code.",
+        "email": user.email,
+        "email_sent": email_sent
+    }
+    
+    if not EmailService.is_configured():
+        response["verification_code"] = verification_code
+        response["message"] = "Demo mode - verification code shown below"
+    
+    return response
+
+@router.post("/users/verify")
+def verify_email(request: VerifyEmailRequest, db: Session = Depends(get_db)):
+    """Verify user email with 6-digit code"""
     user = db.query(User).filter(User.email == request.email).first()
     if not user:
-        user = User(
-            email=request.email,
-            name=request.name,
-            user_type=request.user_type
-        )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-    return user
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.is_verified:
+        return {"status": "already_verified", "message": "Email already verified"}
+    
+    if user.verification_code != request.code:
+        raise HTTPException(status_code=400, detail="Invalid verification code")
+    
+    # Mark as verified
+    user.is_verified = True
+    user.verification_code = None
+    db.commit()
+    
+    return {
+        "status": "verified",
+        "message": "Email verified successfully! You can now login.",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "name": user.name,
+            "user_type": user.user_type,
+            "is_verified": user.is_verified
+        }
+    }
 
-@router.get("/users/{email}", response_model=UserResponse)
+@router.post("/users/resend-code")
+def resend_verification_code(request: ResendCodeRequest, db: Session = Depends(get_db)):
+    """Resend verification code"""
+    user = db.query(User).filter(User.email == request.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.is_verified:
+        return {"status": "already_verified", "message": "Email already verified"}
+    
+    # Generate new code
+    new_code = User.generate_verification_code()
+    user.verification_code = new_code
+    db.commit()
+    
+    # Send email with new code
+    email_sent = EmailService.send_verification_email(
+        to_email=request.email,
+        verification_code=new_code,
+        user_name=user.name
+    )
+    
+    response = {
+        "status": "code_sent",
+        "message": "New verification code sent to your email",
+        "email_sent": email_sent
+    }
+    if not EmailService.is_configured():
+        response["verification_code"] = new_code
+    return response
+
+@router.post("/users/login")
+def user_login(request: UserLoginRequest, db: Session = Depends(get_db)):
+    """Login user with email and password"""
+    user = db.query(User).filter(User.email == request.email).first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Account not found. Please sign up first.")
+    
+    # Check if user has password (new signup flow)
+    if user.password_hash:
+        if not request.password:
+            raise HTTPException(status_code=400, detail="Password required")
+        if not user.verify_password(request.password):
+            raise HTTPException(status_code=401, detail="Invalid password")
+        if not user.is_verified:
+            raise HTTPException(
+                status_code=403, 
+                detail="Email not verified. Please check your email for verification code."
+            )
+    
+    return {
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "user_type": user.user_type,
+        "is_verified": user.is_verified
+    }
+
+@router.get("/users/{email}")
 def get_user(email: str, db: Session = Depends(get_db)):
     """Get user by email"""
     user = db.query(User).filter(User.email == email).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return {
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "user_type": user.user_type,
+        "is_verified": user.is_verified
+    }
 
 # ============= DUA ENDPOINTS =============
 @router.get("/dua/categories")
@@ -148,15 +309,13 @@ def get_dua_categories():
 
 @router.post("/dua/generate")
 async def generate_dua(request: DuaGenerateRequest, db: Session = Depends(get_db)):
-    """Generate a personalized dua using AI - addresses the SPECIFIC situation"""
+    """Generate a personalized dua using AI"""
     try:
-        # Try to use AI-powered generation first
         dua_data = await DuaService.generate_dua_with_ai(request.category, request.context)
     except Exception as e:
         print(f"AI generation failed: {e}")
-        # Fall back to intelligent template generation
         dua_data = DuaService.generate_dua(request.category, request.context)
-    
+
     try:
         saved_dua = DuaService.save_dua_to_history(db, request.email, dua_data)
         return {
@@ -245,8 +404,6 @@ def send_message(request: MessageSendRequest, db: Session = Depends(get_db)):
             db, request.conversation_id, request.sender_email,
             request.sender_type, request.message_text
         )
-        
-        # If user sent a message, generate imam response after a delay
         if request.sender_type == "user":
             conversation = db.query(Conversation).filter(
                 Conversation.id == request.conversation_id
@@ -255,12 +412,11 @@ def send_message(request: MessageSendRequest, db: Session = Depends(get_db)):
                 imam_response_text = ChatService.generate_imam_response(
                     request.message_text, conversation.imam.name
                 )
-                imam_message = ChatService.send_message(
-                    db, request.conversation_id, 
+                ChatService.send_message(
+                    db, request.conversation_id,
                     conversation.imam.email, "imam",
                     imam_response_text
                 )
-        
         return {
             "id": message.id,
             "conversation_id": message.conversation_id,
@@ -292,12 +448,7 @@ def get_messages(conversation_id: int, db: Session = Depends(get_db)):
 @router.post("/analyzer/analyze")
 async def analyze_question(request: AnalyzerQuestionRequest, db: Session = Depends(get_db)):
     """Analyze Islamic question and return personalized guidance using AI"""
-    # Use AI to analyze the prompt and find relevant Quran verse and Hadith
     analysis_result = await AIAnalyzerService.analyze_prompt_with_ai(request.question)
-    
-    # TODO: Save to database when AIAnalysis model is created
-    # For now, just return the AI analysis result
-    
     return analysis_result
 
 @router.get("/analyzer/ayahs")
@@ -336,10 +487,7 @@ def search_videos(query: str, db: Session = Depends(get_db)):
 
 @router.post("/videos/search-by-prompt")
 async def search_videos_by_prompt(request: VideoSearchRequest, db: Session = Depends(get_db)):
-    """
-    AI-powered personalized video search
-    Takes user prompt, extracts Islamic keywords, and searches YouTube
-    """
+    """AI-powered personalized video search"""
     try:
         service = YouTubeAIService()
         result = await service.search_personalized_videos(
@@ -366,7 +514,6 @@ def get_user_history(user_email: str, db: Session = Depends(get_db)):
     history = db.query(UserHistory).filter(
         UserHistory.user_email == user_email
     ).order_by(UserHistory.created_at.desc()).all()
-    
     return [
         {
             "id": h.id,
@@ -394,7 +541,6 @@ def log_action(user_email: str, action_type: str, action_data: dict, db: Session
 def health_check(db: Session = Depends(get_db)):
     """Health check endpoint"""
     try:
-        # Test database connection
         db.execute("SELECT 1")
         return {
             "status": "healthy",
@@ -408,21 +554,17 @@ def health_check(db: Session = Depends(get_db)):
 # ============= IMAM CHAT ENDPOINTS =============
 @router.get("/chat/imam/conversations/{imam_email}")
 def get_imam_conversations(imam_email: str, db: Session = Depends(get_db)):
-    """Get all conversations for an imam to respond to"""
-    from models_extended import Conversation, Imam
-    
+    """Get all conversations for an imam"""
     imam = db.query(Imam).filter(Imam.email == imam_email).first()
     if not imam:
         imams = ChatService.get_all_imams(db)
         imam = next((i for i in imams if i.email == imam_email), None)
-    
     if not imam:
         conversations = db.query(Conversation).order_by(Conversation.updated_at.desc()).all()
     else:
         conversations = db.query(Conversation).filter(
             Conversation.imam_id == imam.id
         ).order_by(Conversation.updated_at.desc()).all()
-    
     return [
         {
             "id": c.id,
@@ -440,8 +582,6 @@ def get_imam_conversations(imam_email: str, db: Session = Depends(get_db)):
 @router.get("/chat/all-conversations")
 def get_all_conversations(db: Session = Depends(get_db)):
     """Get all conversations (for imam dashboard)"""
-    from models_extended import Conversation
-    
     conversations = db.query(Conversation).order_by(Conversation.updated_at.desc()).all()
     return [
         {
@@ -460,12 +600,9 @@ def get_all_conversations(db: Session = Depends(get_db)):
 @router.put("/chat/messages/{message_id}/read")
 def mark_message_read(message_id: int, db: Session = Depends(get_db)):
     """Mark a message as read"""
-    from models_extended import Message
-    
     message = db.query(Message).filter(Message.id == message_id).first()
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
-    
     message.is_read = True
     db.commit()
     return {"status": "success", "message_id": message_id}

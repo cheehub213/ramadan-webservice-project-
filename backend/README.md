@@ -1,141 +1,120 @@
-# Ramadan Helper - Backend Setup
+﻿#  Ramadan Helper API v2.0
 
-## Prerequisites
-- Python 3.8+
-- PostgreSQL (recommended) or MySQL
-- YouTube Data API Key
+A professional REST API for Islamic guidance and resources.
 
-## Installation
+##  Quick Start
 
-### 1. Set Up Environment
 ```bash
-cd backend
-python -m venv venv
-
-# On Windows
-venv\Scripts\activate
-
-# On Mac/Linux
-source venv/bin/activate
-```
-
-### 2. Install Dependencies
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 3. Configure Environment Variables
-Create a `.env` file in the backend directory:
-```
-DATABASE_URL=postgresql://username:password@localhost:5432/ramadan_db
-YOUTUBE_API_KEY=your_youtube_api_key_here
-DEBUG=True
-```
-
-### 4. Get YouTube API Key
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project
-3. Enable "YouTube Data API v3"
-4. Create an API key
-5. Add the key to your `.env` file
-
-### 5. Set Up Database
-
-**PostgreSQL (Recommended)**
-```bash
-# Install PostgreSQL
-# Create database
-createdb ramadan_db
-
-# The app will automatically create tables on startup
-```
-
-**MySQL**
-```bash
-# Update DATABASE_URL in .env
-DATABASE_URL=mysql+pymysql://username:password@localhost:3306/ramadan_db
-
-# Install mysql-connector
-pip install mysql-connector-python
-```
-
-### 6. Run the Server
-```bash
+# Run the server
 python main.py
-
-# Or use uvicorn directly
-uvicorn main:app --reload
 ```
 
-The API will be available at: `http://localhost:8000`
+Server runs at: `http://localhost:8000`
 API Documentation: `http://localhost:8000/docs`
 
-## API Endpoints
+##  API Endpoints
 
-### Search Videos
-```
-POST /api/search
-{
-    "query": "anxiety ramadan",
-    "user_email": "user@example.com"
-}
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/signup` | Register new user |
+| POST | `/api/auth/verify` | Verify email with 6-digit code |
+| POST | `/api/auth/login` | User login |
+| POST | `/api/auth/resend-code` | Resend verification code |
+| POST | `/api/auth/forgot-password` | Request password reset |
+| POST | `/api/auth/reset-password` | Reset password with code |
+
+### Users
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/users/{email}` | Get user profile |
+| PUT | `/api/users/{email}` | Update user profile |
+| DELETE | `/api/users/{email}` | Delete user account |
+
+### Dua
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/dua/categories` | Get all dua categories |
+| POST | `/api/dua/generate` | Generate personalized dua |
+| GET | `/api/dua/history/{email}` | Get user's dua history |
+| POST | `/api/dua/feedback` | Submit dua feedback |
+
+### Chat with Scholars
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/chat/imams` | Get available imams |
+| GET | `/api/chat/imams/{id}` | Get imam details |
+| POST | `/api/chat/conversations` | Start conversation |
+| GET | `/api/chat/conversations/{email}` | Get user conversations |
+| POST | `/api/chat/messages` | Send message |
+| GET | `/api/chat/messages/{id}` | Get conversation messages |
+
+### AI Analyzer
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/analyzer/analyze` | Get relevant Quran verses & Hadiths |
+| GET | `/api/analyzer/topics` | Get available guidance topics |
+| GET | `/api/analyzer/ayahs` | Get all Quran verses |
+| GET | `/api/analyzer/hadiths` | Get all Hadiths |
+
+### Videos
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/videos/search` | Search Islamic videos |
+
+### Statistics
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/stats/dashboard` | Get platform statistics |
+| GET | `/api/stats/user/{email}` | Get user statistics |
+
+### System
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Health check |
+
+##  Configuration
+
+Create a `.env` file:
+
+```env
+# AI Service (Groq)
+GROQ_API_KEY=your_groq_api_key
+
+# Email Service (Gmail)
+EMAIL_ADDRESS=your_gmail@gmail.com
+EMAIL_PASSWORD=your_app_password
+
+# YouTube API
+YOUTUBE_API_KEY=your_youtube_api_key
 ```
 
-### Get All Videos
+##  Project Structure
+
 ```
-GET /api/videos
+backend/
+ main.py                 # Application entry point
+ routes_api.py           # All API endpoints
+ database.py             # Database configuration
+ models_extended.py      # SQLAlchemy models
+ services_ai_analyzer.py # AI Quran/Hadith analyzer
+ services_chat.py        # Chat with scholars
+ services_dua.py         # Dua generation
+ services_email.py       # Email service
+ services_youtube_ai.py  # YouTube video search
+ requirements.txt        # Dependencies
+ .env                    # Environment variables
 ```
 
-### Import Videos from YouTube
-```
-POST /api/videos/import?keywords=ramadan&keywords=islam
-{
-    "youtube_ids": ["dQw4w9WgXcQ", "jNQXAC9IVRw"]
-}
-```
+##  Security
 
-### Search YouTube (Get video IDs to import)
-```
-POST /api/search/youtube
-{
-    "query": "Ramadan Islamic lecture",
-    "max_results": 10
-}
-```
+- Passwords are hashed using SHA256
+- Email verification required for signup
+- Password reset via email code
 
-### User Management
-```
-POST /api/users
-{
-    "email": "user@example.com",
-    "name": "John Doe"
-}
+##  License
 
-GET /api/users/user@example.com
-```
-
-### Save/Get Saved Videos
-```
-POST /api/users/{user_id}/saved-videos/{video_id}
-GET /api/users/{user_id}/saved-videos
-DELETE /api/users/{user_id}/saved-videos/{video_id}
-```
-
-## Database Schema
-
-### Tables
-- **users**: Store user information
-- **videos**: YouTube videos with metadata
-- **keywords**: Tags for categorizing videos
-- **searches**: User search history
-- **search_results**: Ranked search results
-- **saved_videos**: Videos saved by users
-- **video_keywords**: Many-to-many relationship between videos and keywords
-
-## Workflow
-
-1. **Admin/Setup**: Import Islamic videos from YouTube using their video IDs
-2. **User Search**: User submits a search query
-3. **Matching**: Backend searches videos by keyword relevance
-4. **Results**: Return ranked results to frontend
-5. **Save**: User can save videos for later viewing
+MIT License  2026 Ramadan Helper

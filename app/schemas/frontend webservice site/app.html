@@ -29,32 +29,65 @@
 
     <!-- Login Modal -->
     <div id="loginModal" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 16px; padding: 40px; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div style="background: white; border-radius: 16px; padding: 40px; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;">
             <div style="text-align: center; margin-bottom: 30px;">
                 <div style="font-size: 48px; margin-bottom: 10px;">🌙</div>
                 <h1 style="color: #047857; font-size: 28px; font-weight: bold; margin: 0;">Ramadan Helper</h1>
                 <p style="color: #666; margin-top: 8px;">Your Islamic Companion</p>
             </div>
             
+            <!-- Initial Selection -->
             <div id="loginTypeSelection">
                 <button id="btnUserLogin" style="display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: #047857; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">
                     👤 Login as User
+                </button>
+                <button id="btnUserSignup" style="display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: #059669; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">
+                    ✨ Sign Up (New User)
                 </button>
                 <button id="btnImamLogin" style="display: block; width: 100%; padding: 16px; background: #2563eb; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">
                     🕌 Login as Imam
                 </button>
             </div>
             
+            <!-- User Login Form -->
             <div id="userLoginForm" style="display: none;">
                 <h3 style="color: #047857; font-size: 20px; font-weight: bold; margin-bottom: 20px;">👤 User Login</h3>
                 <input type="email" id="userEmailInput" placeholder="your.email@example.com" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
+                <input type="password" id="userPasswordInput" placeholder="Password" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
                 <p id="userEmailError" style="color: #dc2626; font-size: 12px; margin-bottom: 8px; display: none;"></p>
-                <input type="text" id="userNameInput" placeholder="Your name" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 16px;">
                 <button id="btnSubmitUserLogin" style="display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: #047857; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">✓ Login</button>
+                <p style="text-align: center; margin: 12px 0; color: #666;">Don't have an account? <a href="#" id="linkToSignup" style="color: #047857; font-weight: bold;">Sign Up</a></p>
                 <button id="btnBackFromUser" style="display: block; width: 100%; padding: 14px; background: #e5e7eb; color: #374151; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">← Back</button>
                 <div id="userLoginStatus" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
             </div>
             
+            <!-- User Signup Form -->
+            <div id="userSignupForm" style="display: none;">
+                <h3 style="color: #059669; font-size: 20px; font-weight: bold; margin-bottom: 20px;">✨ Create Account</h3>
+                <input type="text" id="signupNameInput" placeholder="Your full name" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
+                <input type="email" id="signupEmailInput" placeholder="your.email@example.com" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
+                <input type="password" id="signupPasswordInput" placeholder="Create password (min 6 characters)" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
+                <input type="password" id="signupConfirmPasswordInput" placeholder="Confirm password" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
+                <p id="signupError" style="color: #dc2626; font-size: 12px; margin-bottom: 8px; display: none;"></p>
+                <button id="btnSubmitSignup" style="display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: #059669; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">📧 Sign Up & Get Verification Code</button>
+                <p style="text-align: center; margin: 12px 0; color: #666;">Already have an account? <a href="#" id="linkToLogin" style="color: #047857; font-weight: bold;">Login</a></p>
+                <button id="btnBackFromSignup" style="display: block; width: 100%; padding: 14px; background: #e5e7eb; color: #374151; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">← Back</button>
+                <div id="signupStatus" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
+            </div>
+            
+            <!-- Email Verification Form -->
+            <div id="verificationForm" style="display: none;">
+                <h3 style="color: #7c3aed; font-size: 20px; font-weight: bold; margin-bottom: 20px;">📧 Verify Your Email</h3>
+                <p style="color: #666; margin-bottom: 16px; text-align: center;">We sent a 6-digit verification code to:<br><strong id="verifyEmailDisplay"></strong></p>
+                <input type="text" id="verificationCodeInput" placeholder="Enter 6-digit code" maxlength="6" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 24px; text-align: center; letter-spacing: 8px; box-sizing: border-box; margin-bottom: 12px;">
+                <p id="verificationError" style="color: #dc2626; font-size: 12px; margin-bottom: 8px; display: none;"></p>
+                <button id="btnSubmitVerification" style="display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: #7c3aed; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">✓ Verify Email</button>
+                <button id="btnResendCode" style="display: block; width: 100%; padding: 14px; margin-bottom: 12px; background: #f3f4f6; color: #374151; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">📤 Resend Code</button>
+                <button id="btnBackFromVerification" style="display: block; width: 100%; padding: 14px; background: #e5e7eb; color: #374151; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">← Back to Signup</button>
+                <div id="verificationStatus" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
+            </div>
+            
+            <!-- Imam Login Form -->
             <div id="imamLoginForm" style="display: none;">
                 <h3 style="color: #2563eb; font-size: 20px; font-weight: bold; margin-bottom: 20px;">🕌 Imam Login</h3>
                 <input type="text" id="imamNameInput" placeholder="Your full name" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
@@ -223,7 +256,8 @@
                     <div class="bg-orange-50 rounded-lg shadow p-6">
                         <h2 class="text-2xl font-bold text-orange-800 mb-4">📚 Related Hadith</h2>
                         <div class="bg-white rounded p-4 mb-4">
-                            <p id="hadithText" class="text-gray-800"></p>
+                            <p id="hadithArabic" class="text-lg text-gray-800 text-right mb-3" dir="rtl"></p>
+                            <p id="hadithText" class="text-gray-800 mb-2"></p>
                             <p id="hadithSource" class="text-sm text-orange-600 font-semibold mt-2"></p>
                         </div>
                         <p id="hadithExplanation" class="text-gray-600"></p>
@@ -255,7 +289,8 @@
 
                 <div id="videoResults" class="hidden">
                     <div class="bg-blue-50 rounded-lg p-4 mb-6">
-                        <p class="text-blue-800"><strong>Search:</strong> <span id="videoSearchQuery"></span></p>
+                        <p class="text-blue-800 mb-1"><strong>🤖 AI Optimized Search:</strong> <span id="videoSearchQuery" class="font-semibold text-blue-900"></span></p>
+                        <p class="text-blue-600 text-sm"><strong>Topic:</strong> <span id="videoMainTopic"></span> | <strong>Keywords:</strong> <span id="videoKeywords"></span></p>
                     </div>
                     
                     <div id="videosGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
@@ -413,10 +448,14 @@
         }
 
         // ============= LOGIN SYSTEM =============
+        let pendingVerificationEmail = '';
+        
         function initLogin() {
             const loginModal = document.getElementById('loginModal');
             const loginTypeSelection = document.getElementById('loginTypeSelection');
             const userLoginForm = document.getElementById('userLoginForm');
+            const userSignupForm = document.getElementById('userSignupForm');
+            const verificationForm = document.getElementById('verificationForm');
             const imamLoginForm = document.getElementById('imamLoginForm');
 
             // Check if already logged in
@@ -435,30 +474,248 @@
                 return;
             }
 
-            // Button handlers
-            document.getElementById('btnUserLogin').onclick = () => {
+            // Helper function to show only one form
+            function showForm(formId) {
                 loginTypeSelection.style.display = 'none';
-                userLoginForm.style.display = 'block';
-            };
-
-            document.getElementById('btnImamLogin').onclick = () => {
-                loginTypeSelection.style.display = 'none';
-                imamLoginForm.style.display = 'block';
-            };
-
-            document.getElementById('btnBackFromUser').onclick = () => {
-                loginTypeSelection.style.display = 'block';
                 userLoginForm.style.display = 'none';
-            };
-
-            document.getElementById('btnBackFromImam').onclick = () => {
-                loginTypeSelection.style.display = 'block';
+                userSignupForm.style.display = 'none';
+                verificationForm.style.display = 'none';
                 imamLoginForm.style.display = 'none';
+                if (formId === 'selection') {
+                    loginTypeSelection.style.display = 'block';
+                } else {
+                    document.getElementById(formId).style.display = 'block';
+                }
+            }
+
+            // Button handlers - Navigation
+            document.getElementById('btnUserLogin').onclick = () => showForm('userLoginForm');
+            document.getElementById('btnUserSignup').onclick = () => showForm('userSignupForm');
+            document.getElementById('btnImamLogin').onclick = () => showForm('imamLoginForm');
+            document.getElementById('btnBackFromUser').onclick = () => showForm('selection');
+            document.getElementById('btnBackFromSignup').onclick = () => showForm('selection');
+            document.getElementById('btnBackFromImam').onclick = () => showForm('selection');
+            document.getElementById('btnBackFromVerification').onclick = () => showForm('userSignupForm');
+            document.getElementById('linkToSignup').onclick = (e) => { e.preventDefault(); showForm('userSignupForm'); };
+            document.getElementById('linkToLogin').onclick = (e) => { e.preventDefault(); showForm('userLoginForm'); };
+
+            // ========== USER SIGNUP ==========
+            document.getElementById('btnSubmitSignup').onclick = async () => {
+                const name = document.getElementById('signupNameInput').value.trim();
+                const email = document.getElementById('signupEmailInput').value.trim();
+                const password = document.getElementById('signupPasswordInput').value;
+                const confirmPassword = document.getElementById('signupConfirmPasswordInput').value;
+                const errorEl = document.getElementById('signupError');
+                const statusEl = document.getElementById('signupStatus');
+
+                // Validation
+                if (!name || name.length < 2) {
+                    errorEl.textContent = 'Please enter your full name';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                if (!email || !email.includes('@') || !email.includes('.')) {
+                    errorEl.textContent = 'Please enter a valid email address';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                if (!password || password.length < 6) {
+                    errorEl.textContent = 'Password must be at least 6 characters';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    errorEl.textContent = 'Passwords do not match';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                errorEl.style.display = 'none';
+                statusEl.style.display = 'block';
+                statusEl.style.background = '#fef3c7';
+                statusEl.style.color = '#92400e';
+                statusEl.textContent = '⏳ Creating account...';
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/users/signup`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, name, password, user_type: 'user' })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        pendingVerificationEmail = email;
+                        document.getElementById('verifyEmailDisplay').textContent = email;
+                        
+                        statusEl.style.background = '#d1fae5';
+                        statusEl.style.color = '#047857';
+                        
+                        // Check if real email was sent or demo mode
+                        if (data.email_sent) {
+                            statusEl.innerHTML = `✅ Account created!<br>📧 <strong>Verification code sent to your email!</strong><br><small>Check your inbox (and spam folder) for the 6-digit code.</small>`;
+                        } else if (data.verification_code) {
+                            // Demo mode - show code on screen
+                            statusEl.innerHTML = `✅ Account created!<br><strong>Demo Mode:</strong> Your code is: <span style="font-size: 20px; letter-spacing: 2px; background: #f0fdf4; padding: 4px 8px; border-radius: 4px;">${data.verification_code}</span><br><small>Email service not configured - code shown here.</small>`;
+                        } else {
+                            statusEl.innerHTML = `✅ Account created!<br>Check your email for the verification code.`;
+                        }
+                        
+                        setTimeout(() => showForm('verificationForm'), 2500);
+                    } else {
+                        errorEl.textContent = data.detail || 'Signup failed';
+                        errorEl.style.display = 'block';
+                        statusEl.style.display = 'none';
+                    }
+                } catch (error) {
+                    // Demo mode - simulate signup when backend is offline
+                    pendingVerificationEmail = email;
+                    document.getElementById('verifyEmailDisplay').textContent = email;
+                    const demoCode = Math.floor(100000 + Math.random() * 900000);
+                    statusEl.style.background = '#dbeafe';
+                    statusEl.style.color = '#1d4ed8';
+                    statusEl.innerHTML = `📧 Demo Mode (Backend Offline):<br>Your verification code is: <span style="font-size: 20px; letter-spacing: 2px; background: #eff6ff; padding: 4px 8px; border-radius: 4px;">${demoCode}</span>`;
+                    localStorage.setItem('demoVerificationCode', demoCode.toString());
+                    localStorage.setItem('pendingUser', JSON.stringify({ name, email, password }));
+                    setTimeout(() => showForm('verificationForm'), 2000);
+                }
             };
 
+            // ========== EMAIL VERIFICATION ==========
+            document.getElementById('btnSubmitVerification').onclick = async () => {
+                const code = document.getElementById('verificationCodeInput').value.trim();
+                const errorEl = document.getElementById('verificationError');
+                const statusEl = document.getElementById('verificationStatus');
+
+                if (!code || code.length !== 6) {
+                    errorEl.textContent = 'Please enter the 6-digit code';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                errorEl.style.display = 'none';
+                statusEl.style.display = 'block';
+                statusEl.style.background = '#fef3c7';
+                statusEl.style.color = '#92400e';
+                statusEl.textContent = '⏳ Verifying...';
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/users/verify`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: pendingVerificationEmail, code })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && (data.status === 'verified' || data.status === 'already_verified')) {
+                        statusEl.style.background = '#d1fae5';
+                        statusEl.style.color = '#047857';
+                        statusEl.textContent = '✅ Email verified! Logging you in...';
+                        
+                        currentUser = { 
+                            type: 'user', 
+                            email: data.user?.email || pendingVerificationEmail, 
+                            name: data.user?.name || pendingVerificationEmail.split('@')[0],
+                            is_verified: true,
+                            loginTime: new Date().toISOString() 
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        localStorage.setItem('userEmail', currentUser.email);
+                        userEmail = currentUser.email;
+
+                        setTimeout(() => {
+                            loginModal.style.display = 'none';
+                            document.getElementById('userProfileHeader').classList.remove('hidden');
+                            document.getElementById('userTypeDisplay').textContent = '👤 User';
+                            document.getElementById('userNameDisplay').textContent = currentUser.name;
+                        }, 1000);
+                    } else {
+                        errorEl.textContent = data.detail || 'Invalid verification code';
+                        errorEl.style.display = 'block';
+                        statusEl.style.display = 'none';
+                    }
+                } catch (error) {
+                    // Demo mode - check local code
+                    const demoCode = localStorage.getItem('demoVerificationCode');
+                    const pendingUser = JSON.parse(localStorage.getItem('pendingUser') || '{}');
+                    
+                    if (code === demoCode) {
+                        statusEl.style.background = '#d1fae5';
+                        statusEl.style.color = '#047857';
+                        statusEl.textContent = '✅ Email verified! Logging you in...';
+                        
+                        currentUser = { 
+                            type: 'user', 
+                            email: pendingUser.email || pendingVerificationEmail, 
+                            name: pendingUser.name || pendingVerificationEmail.split('@')[0],
+                            is_verified: true,
+                            loginTime: new Date().toISOString() 
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        localStorage.setItem('userEmail', currentUser.email);
+                        localStorage.removeItem('demoVerificationCode');
+                        localStorage.removeItem('pendingUser');
+                        userEmail = currentUser.email;
+
+                        setTimeout(() => {
+                            loginModal.style.display = 'none';
+                            document.getElementById('userProfileHeader').classList.remove('hidden');
+                            document.getElementById('userTypeDisplay').textContent = '👤 User';
+                            document.getElementById('userNameDisplay').textContent = currentUser.name;
+                        }, 1000);
+                    } else {
+                        errorEl.textContent = 'Invalid verification code';
+                        errorEl.style.display = 'block';
+                        statusEl.style.display = 'none';
+                    }
+                }
+            };
+
+            // ========== RESEND CODE ==========
+            document.getElementById('btnResendCode').onclick = async () => {
+                const statusEl = document.getElementById('verificationStatus');
+                statusEl.style.display = 'block';
+                statusEl.style.background = '#fef3c7';
+                statusEl.style.color = '#92400e';
+                statusEl.textContent = '⏳ Resending code...';
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/users/resend-code`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: pendingVerificationEmail })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        statusEl.style.background = '#d1fae5';
+                        statusEl.style.color = '#047857';
+                        
+                        if (data.email_sent) {
+                            statusEl.innerHTML = `✅ New code sent to your email!<br><small>Check your inbox (and spam folder).</small>`;
+                        } else if (data.verification_code) {
+                            statusEl.innerHTML = `✅ New code generated!<br><strong>Demo:</strong> <span style="font-size: 20px; letter-spacing: 2px;">${data.verification_code}</span>`;
+                        } else {
+                            statusEl.innerHTML = `✅ New code sent to your email!`;
+                        }
+                    }
+                } catch (error) {
+                    // Demo mode - backend offline
+                    const newCode = Math.floor(100000 + Math.random() * 900000);
+                    localStorage.setItem('demoVerificationCode', newCode.toString());
+                    statusEl.style.background = '#dbeafe';
+                    statusEl.style.color = '#1d4ed8';
+                    statusEl.innerHTML = `📧 Demo Mode: New code: <span style="font-size: 20px; letter-spacing: 2px;">${newCode}</span>`;
+                }
+            };
+
+            // ========== USER LOGIN ==========
             document.getElementById('btnSubmitUserLogin').onclick = async () => {
                 const email = document.getElementById('userEmailInput').value.trim();
-                const name = document.getElementById('userNameInput').value.trim() || email.split('@')[0];
+                const password = document.getElementById('userPasswordInput').value;
                 const errorEl = document.getElementById('userEmailError');
                 const statusEl = document.getElementById('userLoginStatus');
 
@@ -467,35 +724,84 @@
                     errorEl.style.display = 'block';
                     return;
                 }
-
-                // Validate email domain
-                const domain = email.split('@')[1].toLowerCase();
-                const fakeDomains = ['test.com', 'example.com', 'fake.com', 'mailinator.com'];
-                if (fakeDomains.includes(domain)) {
-                    errorEl.textContent = 'Please use a real email address';
+                if (!password) {
+                    errorEl.textContent = 'Please enter your password';
                     errorEl.style.display = 'block';
                     return;
                 }
 
                 errorEl.style.display = 'none';
                 statusEl.style.display = 'block';
-                statusEl.style.background = '#d1fae5';
-                statusEl.style.color = '#047857';
-                statusEl.textContent = '✅ Login successful!';
+                statusEl.style.background = '#fef3c7';
+                statusEl.style.color = '#92400e';
+                statusEl.textContent = '⏳ Logging in...';
 
-                currentUser = { type: 'user', email, name, loginTime: new Date().toISOString() };
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                localStorage.setItem('userEmail', email);
-                userEmail = email;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/users/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password, user_type: 'user' })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        statusEl.style.background = '#d1fae5';
+                        statusEl.style.color = '#047857';
+                        statusEl.textContent = '✅ Login successful!';
 
-                setTimeout(() => {
-                    loginModal.style.display = 'none';
-                    document.getElementById('userProfileHeader').classList.remove('hidden');
-                    document.getElementById('userTypeDisplay').textContent = '👤 User';
-                    document.getElementById('userNameDisplay').textContent = name;
-                }, 500);
+                        currentUser = { 
+                            type: 'user', 
+                            email: data.email, 
+                            name: data.name || email.split('@')[0],
+                            is_verified: data.is_verified,
+                            loginTime: new Date().toISOString() 
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        localStorage.setItem('userEmail', email);
+                        userEmail = email;
+
+                        setTimeout(() => {
+                            loginModal.style.display = 'none';
+                            document.getElementById('userProfileHeader').classList.remove('hidden');
+                            document.getElementById('userTypeDisplay').textContent = '👤 User';
+                            document.getElementById('userNameDisplay').textContent = currentUser.name;
+                        }, 500);
+                    } else if (response.status === 403) {
+                        // Not verified - redirect to verification
+                        pendingVerificationEmail = email;
+                        document.getElementById('verifyEmailDisplay').textContent = email;
+                        errorEl.textContent = data.detail;
+                        errorEl.style.display = 'block';
+                        statusEl.style.display = 'none';
+                        // Offer to resend code
+                        setTimeout(() => showForm('verificationForm'), 1500);
+                    } else {
+                        errorEl.textContent = data.detail || 'Login failed';
+                        errorEl.style.display = 'block';
+                        statusEl.style.display = 'none';
+                    }
+                } catch (error) {
+                    // Demo mode - allow simple login
+                    statusEl.style.background = '#dbeafe';
+                    statusEl.style.color = '#1d4ed8';
+                    statusEl.textContent = '📧 Demo Mode: Logged in successfully!';
+
+                    currentUser = { type: 'user', email, name: email.split('@')[0], loginTime: new Date().toISOString() };
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    localStorage.setItem('userEmail', email);
+                    userEmail = email;
+
+                    setTimeout(() => {
+                        loginModal.style.display = 'none';
+                        document.getElementById('userProfileHeader').classList.remove('hidden');
+                        document.getElementById('userTypeDisplay').textContent = '👤 User';
+                        document.getElementById('userNameDisplay').textContent = currentUser.name;
+                    }, 500);
+                }
             };
 
+            // ========== IMAM LOGIN ==========
             document.getElementById('btnSubmitImamLogin').onclick = async () => {
                 const name = document.getElementById('imamNameInput').value.trim();
                 const email = document.getElementById('imamEmailInput').value.trim();
@@ -618,14 +924,43 @@
                 if (response.ok) {
                     const data = await response.json();
                     
+                    // Check if NO_MATCH response (topic not in database)
+                    if (data.response === 'NO_MATCH') {
+                        document.getElementById('aiExplanation').innerHTML = `
+                            <div style="background: #fef3c7; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                                <strong>⚠️ Topic Not Available</strong><br>
+                                ${data.message || "We don't have specific guidance on this topic."}
+                            </div>
+                            <div style="background: #dbeafe; padding: 16px; border-radius: 8px;">
+                                <strong>📚 Available Topics:</strong><br>
+                                ${(data.available_topics || ['Marriage', 'Family', 'Patience', 'Hardship', 'Forgiveness', 'Anger', 'Charity']).map(t => `• ${t}`).join('<br>')}
+                            </div>
+                        `;
+                        document.getElementById('ayahArabic').textContent = '—';
+                        document.getElementById('ayahReference').textContent = '';
+                        document.getElementById('ayahTranslation').textContent = 'Please ask about one of the available topics above.';
+                        document.getElementById('ayahExplanation').textContent = '';
+                        document.getElementById('hadithText').textContent = '—';
+                        document.getElementById('hadithSource').textContent = '';
+                        document.getElementById('hadithExplanation').textContent = 'Rephrase your question to match an available topic.';
+                        results.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    // Display matched results
                     document.getElementById('aiExplanation').textContent = data.ai_explanation;
-                    document.getElementById('ayahArabic').textContent = data.ayah.arabic;
-                    document.getElementById('ayahReference').textContent = '📍 ' + data.ayah.reference;
-                    document.getElementById('ayahTranslation').textContent = data.ayah.translation;
-                    document.getElementById('ayahExplanation').textContent = data.ayah.explanation;
-                    document.getElementById('hadithText').textContent = data.hadith.text;
-                    document.getElementById('hadithSource').textContent = '📚 ' + data.hadith.narrator;
-                    document.getElementById('hadithExplanation').textContent = data.hadith.explanation;
+                    document.getElementById('ayahArabic').textContent = data.ayah?.arabic || '—';
+                    document.getElementById('ayahReference').textContent = '📍 ' + (data.ayah?.reference || 'Quran');
+                    document.getElementById('ayahTranslation').textContent = data.ayah?.translation || '';
+                    document.getElementById('ayahExplanation').textContent = data.ayah?.explanation || '';
+                    
+                    // Handle hadith - backend returns text_en and text_ar
+                    const hadithText = data.hadith?.text_en || data.hadith?.text || '';
+                    const hadithArabic = data.hadith?.text_ar || '';
+                    document.getElementById('hadithArabic').textContent = hadithArabic || '—';
+                    document.getElementById('hadithText').textContent = hadithText;
+                    document.getElementById('hadithSource').textContent = '📚 ' + (data.hadith?.narrator || 'Hadith');
+                    document.getElementById('hadithExplanation').textContent = data.hadith?.explanation || '';
                     
                     results.classList.remove('hidden');
                 } else {
@@ -638,6 +973,7 @@
                 document.getElementById('ayahReference').textContent = '📍 Surah An-Nahl (16:127)';
                 document.getElementById('ayahTranslation').textContent = 'And be patient, and your patience is not but through Allah.';
                 document.getElementById('ayahExplanation').textContent = 'This verse reminds us that true patience comes from relying on Allah. Whatever challenge you face, turn to Him for strength.';
+                document.getElementById('hadithArabic').textContent = 'من كان يؤمن بالله واليوم الآخر فليقل خيرا أو ليصمت';
                 document.getElementById('hadithText').textContent = 'The Prophet (ﷺ) said: "Whoever believes in Allah and the Last Day should speak good or remain silent."';
                 document.getElementById('hadithSource').textContent = '📚 Sahih al-Bukhari & Muslim';
                 document.getElementById('hadithExplanation').textContent = 'This hadith teaches us the importance of mindful speech and self-control in our daily interactions.';
@@ -668,11 +1004,13 @@
             results.classList.add('hidden');
 
             try {
-                // First, try to get AI-generated search keywords from backend
-                let searchQuery = prompt + ' Islamic lecture';
+                // Use AI to extract optimized search keywords from the prompt
+                let searchQuery = prompt;
+                let mainTopic = 'Islamic Content';
+                let keywords = ['Islamic', 'guidance'];
                 
                 try {
-                    const aiResponse = await fetch(`${API_BASE_URL}/videos/search-by-prompt`, {
+                    const aiResponse = await fetch(`${API_BASE_URL}/videos/search`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email: userEmail || 'guest@app.local', prompt })
@@ -680,13 +1018,19 @@
                     
                     if (aiResponse.ok) {
                         const aiData = await aiResponse.json();
-                        searchQuery = aiData.search_query || searchQuery;
+                        searchQuery = aiData.search_query || prompt;
+                        mainTopic = aiData.main_topic || 'Islamic Content';
+                        keywords = aiData.keywords || ['Islamic'];
+                        console.log('AI optimized search:', searchQuery, 'from prompt:', prompt.substring(0, 50) + '...');
                     }
                 } catch (e) {
-                    console.log('Using default search query');
+                    console.log('AI optimization failed, using fallback');
+                    searchQuery = prompt.split(' ').slice(0, 5).join(' ') + ' Islamic';
                 }
 
                 document.getElementById('videoSearchQuery').textContent = searchQuery;
+                document.getElementById('videoMainTopic').textContent = mainTopic;
+                document.getElementById('videoKeywords').textContent = keywords.join(', ');
 
                 // Use YouTube search URL approach - display video cards that link to YouTube search
                 const islamicChannels = [
@@ -705,7 +1049,7 @@
                         </div>
                         <div class="p-4">
                             <h3 class="font-bold text-gray-900 mb-2">${channel.name}</h3>
-                            <p class="text-sm text-gray-600 mb-4">Search for: "${prompt}"</p>
+                            <p class="text-sm text-gray-600 mb-4">Topic: "${mainTopic}"</p>
                             <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(channel.query)}" 
                                target="_blank" 
                                class="block w-full text-center px-4 py-3 bg-red-600 text-white font-semibold rounded hover:bg-red-700">
