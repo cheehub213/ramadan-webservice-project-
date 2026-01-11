@@ -15,6 +15,14 @@ load_dotenv(env_path)
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
+# Import Quran Semantic Search
+try:
+    from services_quran_search import search_quran_by_topic, get_quran_search
+    SEMANTIC_SEARCH_AVAILABLE = True
+except ImportError:
+    SEMANTIC_SEARCH_AVAILABLE = False
+    print("Warning: Quran semantic search not available")
+
 class AIAnalyzerService:
     """Service for AI-powered Islamic guidance and Quran/Hadith analysis"""
     
@@ -139,6 +147,89 @@ class AIAnalyzerService:
             "translation": "My Lord, forgive me and my parents and whoever enters my house as a believer",
             "explanation": "Making supplication for family, loved ones, and believers shows compassion and spiritual concern for others' spiritual wellbeing.",
             "keywords": ["family", "forgiveness", "dua", "parents", "loved ones", "intercession"]
+        },
+        # === MONEY, WEALTH & PROVISION (RIZQ) VERSES ===
+        {
+            "id": 16,
+            "reference": "Quran 65:2-3",
+            "arabic": "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا * وَيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ",
+            "translation": "And whoever fears Allah - He will make for him a way out and will provide for him from where he does not expect",
+            "explanation": "Allah promises that those who are mindful of Him will find unexpected solutions to their problems and provision from sources they never imagined. Trust in Allah's plan for your sustenance.",
+            "keywords": ["money", "provision", "rizq", "wealth", "income", "sustenance", "financial", "poverty", "broke", "poor", "need money", "lack of money", "bills", "expenses", "debt", "struggling financially"]
+        },
+        {
+            "id": 17,
+            "reference": "Quran 11:6",
+            "arabic": "وَمَا مِن دَابَّةٍ فِي الْأَرْضِ إِلَّا عَلَى اللَّهِ رِزْقُهَا",
+            "translation": "There is no creature on earth but that upon Allah is its provision",
+            "explanation": "Allah guarantees provision for every living being. If He provides for the birds and animals, He will certainly provide for you. Never lose hope in Allah's sustenance.",
+            "keywords": ["provision", "rizq", "sustenance", "money", "wealth", "food", "poor", "poverty", "broke", "financial hardship", "struggling", "need help", "hungry"]
+        },
+        {
+            "id": 18,
+            "reference": "Quran 2:268",
+            "arabic": "الشَّيْطَانُ يَعِدُكُمُ الْفَقْرَ وَيَأْمُرُكُم بِالْفَحْشَاءِ وَاللَّهُ يَعِدُكُم مَّغْفِرَةً مِّنْهُ وَفَضْلًا",
+            "translation": "Satan threatens you with poverty and orders you to immorality, while Allah promises you forgiveness from Him and bounty",
+            "explanation": "Fear of poverty often comes from Shaytan to make us desperate. Allah promises His bounty and blessings to those who trust Him and remain righteous, even in financial difficulty.",
+            "keywords": ["poverty", "money", "fear", "poor", "broke", "financial", "wealth", "bounty", "desperation", "lack of money", "scared", "worried about money"]
+        },
+        {
+            "id": 19,
+            "reference": "Quran 3:26",
+            "arabic": "قُلِ اللَّهُمَّ مَالِكَ الْمُلْكِ تُؤْتِي الْمُلْكَ مَن تَشَاءُ وَتَنزِعُ الْمُلْكَ مِمَّن تَشَاءُ",
+            "translation": "Say, 'O Allah, Owner of Sovereignty, You give sovereignty to whom You will and You take sovereignty away from whom You will'",
+            "explanation": "All wealth and power belong to Allah alone. He gives and takes as He wills. Trust that your financial situation is in His hands, and He knows what is best for you.",
+            "keywords": ["wealth", "money", "power", "sovereignty", "rich", "poor", "financial", "prosperity", "success", "business"]
+        },
+        {
+            "id": 20,
+            "reference": "Quran 28:77",
+            "arabic": "وَابْتَغِ فِيمَا آتَاكَ اللَّهُ الدَّارَ الْآخِرَةَ وَلَا تَنسَ نَصِيبَكَ مِنَ الدُّنْيَا",
+            "translation": "Seek through what Allah has given you the home of the Hereafter, and do not forget your share of the world",
+            "explanation": "Islam encourages balance - seek worldly provisions while keeping focus on the eternal reward. Work hard for your livelihood while maintaining your spiritual priorities.",
+            "keywords": ["balance", "world", "work", "money", "career", "livelihood", "job", "provision", "success", "business", "earnings"]
+        },
+        {
+            "id": 21,
+            "reference": "Quran 17:30",
+            "arabic": "إِنَّ رَبَّكَ يَبْسُطُ الرِّزْقَ لِمَن يَشَاءُ وَيَقْدِرُ",
+            "translation": "Indeed, your Lord extends provision for whom He wills and restricts it",
+            "explanation": "Allah controls all provision - sometimes He gives abundantly, sometimes He tests us with less. Both are tests of faith. The poor are tested with patience, the rich with gratitude.",
+            "keywords": ["provision", "rizq", "wealth", "money", "rich", "poor", "test", "patience", "financial", "income"]
+        },
+        {
+            "id": 22,
+            "reference": "Quran 9:105",
+            "arabic": "وَقُلِ اعْمَلُوا فَسَيَرَى اللَّهُ عَمَلَكُمْ وَرَسُولُهُ وَالْمُؤْمِنُونَ",
+            "translation": "Say, 'Work, for Allah will see your deeds, and so will His Messenger and the believers'",
+            "explanation": "Allah encourages hard work and effort. While you trust in Allah for provision, you must also take action. Work hard and Allah will bless your efforts.",
+            "keywords": ["work", "job", "career", "effort", "deeds", "employment", "business", "success", "action", "hustle"]
+        },
+        # === ANXIETY & WORRY VERSES ===
+        {
+            "id": 23,
+            "reference": "Quran 13:28",
+            "arabic": "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ",
+            "translation": "Verily, in the remembrance of Allah do hearts find rest",
+            "explanation": "When anxiety overwhelms you, especially about money or life problems, the remembrance of Allah brings peace to the heart. Dhikr is the cure for worried souls.",
+            "keywords": ["anxiety", "worry", "stress", "peace", "calm", "mental health", "depression", "fear", "panic", "overwhelmed", "scared"]
+        },
+        {
+            "id": 24,
+            "reference": "Quran 2:153",
+            "arabic": "يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",
+            "translation": "O you who believe, seek help through patience and prayer. Indeed, Allah is with the patient",
+            "explanation": "In times of financial difficulty or any hardship, seek refuge in patience and prayer. Allah is with those who patiently persevere through their struggles.",
+            "keywords": ["patience", "prayer", "help", "difficulty", "hardship", "struggle", "sabr", "salah", "support"]
+        },
+        # === DEBT & FINANCIAL OBLIGATIONS ===
+        {
+            "id": 25,
+            "reference": "Quran 2:280",
+            "arabic": "وَإِن كَانَ ذُو عُسْرَةٍ فَنَظِرَةٌ إِلَىٰ مَيْسَرَةٍ",
+            "translation": "And if someone is in hardship, then postpone (the debt) until a time of ease",
+            "explanation": "Islam teaches mercy in financial dealings. If you owe money and are struggling, seek patience from those you owe. Allah acknowledges financial hardship.",
+            "keywords": ["debt", "loan", "owe money", "bills", "payment", "financial hardship", "credit", "money owed", "borrowing"]
         }
     ]
     
@@ -263,6 +354,71 @@ class AIAnalyzerService:
             "narrator": "Sahih Bukhari",
             "explanation": "The Prophet taught that if you cannot say something good and helpful, it's better to remain silent. This prevents harm and maintains peaceful relations.",
             "keywords": ["speech", "kindness", "respect", "neighbors", "community", "words"]
+        },
+        # === MONEY, WEALTH & PROVISION (RIZQ) HADITHS ===
+        {
+            "id": 16,
+            "text_en": "If you put your trust completely in Allah, He will provide for you as He provides for the birds - they go out early in the morning empty and return full.",
+            "text_ar": "لو أنكم تتوكلون على الله حق توكله لرزقكم كما يرزق الطير تغدو خماصاً وتروح بطاناً",
+            "narrator": "At-Tirmidhi",
+            "explanation": "Trust in Allah (tawakkul) combined with effort brings provision. Like birds who work for their food but trust Allah, we should make effort while relying on Allah for success.",
+            "keywords": ["provision", "rizq", "trust", "tawakkul", "money", "wealth", "sustenance", "income", "poor", "broke", "financial", "struggle"]
+        },
+        {
+            "id": 17,
+            "text_en": "O Allah! I seek refuge in You from anxiety and grief, and I seek refuge in You from incapacity and laziness, and I seek refuge in You from debt and being overpowered by men.",
+            "text_ar": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ الْهَمِّ وَالْحَزَنِ، وَالْعَجْزِ وَالْكَسَلِ، وَالْبُخْلِ وَالْجُبْنِ، وَضَلَعِ الدَّيْنِ وَغَلَبَةِ الرِّجَالِ",
+            "narrator": "Sahih Bukhari",
+            "explanation": "The Prophet (ﷺ) taught this dua specifically for financial worries and debt. Recite it regularly when facing money problems or anxiety about finances.",
+            "keywords": ["debt", "anxiety", "money", "worry", "financial", "poor", "loan", "bills", "stress", "dua for money", "broke"]
+        },
+        {
+            "id": 18,
+            "text_en": "Wealth is not in having many possessions, but rather wealth is the richness of the soul.",
+            "text_ar": "ليس الغنى عن كثرة العرض ولكن الغنى غنى النفس",
+            "narrator": "Sahih Bukhari and Muslim",
+            "explanation": "True wealth is contentment and inner peace, not material possessions. Even if you have little money, a content heart is richer than a million dollars with a troubled soul.",
+            "keywords": ["wealth", "contentment", "money", "rich", "poor", "peace", "soul", "happiness", "materialism"]
+        },
+        {
+            "id": 19,
+            "text_en": "Be in this world as if you were a stranger or a traveler.",
+            "text_ar": "كن في الدنيا كأنك غريب أو عابر سبيل",
+            "narrator": "Sahih Bukhari",
+            "explanation": "Don't be too attached to worldly wealth. Money comes and goes, but your faith and good deeds remain. Focus on what truly matters for your eternal success.",
+            "keywords": ["world", "attachment", "money", "wealth", "materialism", "perspective", "priorities", "dunya"]
+        },
+        {
+            "id": 20,
+            "text_en": "The upper hand (the giving hand) is better than the lower hand (the receiving hand).",
+            "text_ar": "اليد العليا خير من اليد السفلى",
+            "narrator": "Sahih Bukhari and Muslim",
+            "explanation": "It's better to give than receive. Even in financial difficulty, look for ways to give - even a smile is charity. Generosity brings blessings and opens doors to provision.",
+            "keywords": ["charity", "giving", "generosity", "money", "poor", "sadaqah", "blessing", "provision"]
+        },
+        {
+            "id": 21,
+            "text_en": "No one eats better food than that which he earns from the work of his own hands.",
+            "text_ar": "ما أكل أحد طعاماً قط خيراً من أن يأكل من عمل يده",
+            "narrator": "Sahih Bukhari",
+            "explanation": "Halal earnings from your own hard work are the most blessed. Don't be ashamed of any honest work - it's noble and blessed by Allah.",
+            "keywords": ["work", "job", "earnings", "halal", "employment", "career", "money", "income", "business", "labor"]
+        },
+        {
+            "id": 22,
+            "text_en": "Whoever Allah wants good for, He tests him with hardship.",
+            "text_ar": "من يرد الله به خيراً يصب منه",
+            "narrator": "Sahih Bukhari",
+            "explanation": "Financial hardship may be a sign that Allah wants good for you. Tests purify our souls and elevate our rank. Stay patient - better times are coming.",
+            "keywords": ["hardship", "test", "trial", "patience", "difficulty", "struggle", "poor", "broke", "financial problems"]
+        },
+        {
+            "id": 23,
+            "text_en": "Take advantage of five before five: your youth before your old age, your health before your sickness, your wealth before your poverty, your free time before your busyness, and your life before your death.",
+            "text_ar": "اغتنم خمساً قبل خمس: شبابك قبل هرمك، وصحتك قبل سقمك، وغناك قبل فقرك، وفراغك قبل شغلك، وحياتك قبل موتك",
+            "narrator": "Al-Hakim",
+            "explanation": "When you have money, use it wisely for good. If you're currently struggling, know that circumstances change. Plan wisely and be grateful for what you have.",
+            "keywords": ["time", "youth", "health", "wealth", "opportunity", "planning", "money", "gratitude"]
         }
     ]
     
@@ -424,7 +580,163 @@ If they don't match any available topics, respond with NO_MATCH."""
         """Return a default response when AI is unavailable"""
         return {
             "ai_explanation": "Trust in Allah and remember that every challenge is an opportunity for growth and spiritual development.",
-            "ayah": AIAnalyzerService.QURAN_AYAHS[1],  # Surah Al-Inshirah
+            "ayah": AIAnalyzerService.QURAN_AYAHS[2],  # Surah Al-Inshirah (with hardship comes ease)
             "hadith": AIAnalyzerService.HADITHS[3],  # Patience hadith
+            "ai_generated": False
+        }
+    
+    async def analyze(self, question: str) -> dict:
+        """
+        Main analyze method - uses semantic search to find relevant Quran verses
+        and AI to generate explanations
+        """
+        # Available topics for user guidance
+        available_topics = [
+            "money/provision/wealth", "marriage/spouse", "family/parents", 
+            "patience/hardship", "anxiety/stress", "forgiveness", "death/grief",
+            "gratitude/thankfulness", "charity/giving", "health/sickness",
+            "dua/supplication", "tawbah/repentance", "trust in Allah/tawakkul"
+        ]
+        
+        # First, try semantic search for Quran verses
+        quran_result = None
+        if SEMANTIC_SEARCH_AVAILABLE:
+            try:
+                quran_result = await search_quran_by_topic(question)
+                print(f"Semantic search found: {quran_result.get('reference', 'N/A')} (score: {quran_result.get('score', 0):.2f})")
+            except Exception as e:
+                print(f"Semantic search error: {e}")
+        
+        # Check if semantic search found a good match (score > 0.25 is reasonable)
+        MIN_MATCH_SCORE = 0.25
+        
+        if quran_result and quran_result.get("score", 0) >= MIN_MATCH_SCORE:
+            # Good match found - generate full response
+            ai_explanation = await self._generate_explanation(question, quran_result)
+            
+            # Get a relevant hadith
+            hadith = self._find_best_hadith_by_keywords(question)
+            
+            return {
+                "match_found": True,
+                "ai_explanation": ai_explanation,
+                "ayah": {
+                    "arabic": quran_result.get("arabic", ""),
+                    "reference": quran_result.get("reference", ""),
+                    "translation": quran_result.get("translation", ""),
+                    "explanation": f"This verse from Surah {quran_result.get('surah_name', '')} addresses themes of: {', '.join(quran_result.get('topics', [])[:5])}"
+                },
+                "hadith": {
+                    "text": hadith.get("text_en", hadith.get("text", "")),
+                    "narrator": hadith.get("narrator", ""),
+                    "explanation": hadith.get("explanation", "")
+                },
+                "ai_generated": True,
+                "search_score": quran_result.get("score", 0)
+            }
+        
+        # No good match found - return guidance message without verse/hadith
+        return {
+            "match_found": False,
+            "ai_explanation": f"We couldn't find a specific match for your question in our database. Please try rephrasing your question or ask about one of these topics:\n\n• {chr(10).join(['• ' + topic for topic in available_topics])}",
+            "ayah": None,
+            "hadith": None,
+            "ai_generated": False,
+            "available_topics": available_topics,
+            "search_score": quran_result.get("score", 0) if quran_result else 0
+        }
+    
+    async def _generate_explanation(self, question: str, quran_result: dict) -> str:
+        """Generate an AI explanation for the found Quran verse"""
+        if not GROQ_API_KEY:
+            return f"Based on your concern about '{question[:50]}...', Allah guides us in {quran_result.get('reference', 'the Quran')}: '{quran_result.get('translation', '')}'. This verse reminds us to trust in Allah's wisdom and mercy."
+        
+        try:
+            prompt = f"""The user asked: "{question}"
+
+I found this relevant Quran verse:
+{quran_result.get('reference', 'Quran')}: "{quran_result.get('translation', '')}"
+
+Please write a brief, compassionate 2-3 sentence explanation of how this verse addresses the user's concern. Be warm and supportive. Do not repeat the verse translation, just explain its relevance."""
+
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                response = await client.post(
+                    GROQ_API_URL,
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {GROQ_API_KEY}"
+                    },
+                    json={
+                        "model": "llama-3.3-70b-versatile",
+                        "messages": [
+                            {"role": "system", "content": "You are a compassionate Islamic scholar providing brief, supportive guidance."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        "temperature": 0.7,
+                        "max_tokens": 200
+                    }
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    return result["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            print(f"Error generating explanation: {e}")
+        
+        return f"This verse from {quran_result.get('reference', 'the Quran')} directly addresses your concern. Allah's words provide comfort and guidance for exactly this situation."
+    
+    def _find_best_hadith_by_keywords(self, question: str) -> dict:
+        """Find the best matching hadith using keywords"""
+        question_lower = question.lower()
+        
+        best_hadith = None
+        best_score = 0
+        for hadith in AIAnalyzerService.HADITHS:
+            score = sum(1 for kw in hadith.get("keywords", []) if kw.lower() in question_lower)
+            if score > best_score:
+                best_score = score
+                best_hadith = hadith
+        
+        if best_hadith:
+            return best_hadith
+        
+        # Return a general hadith if no match
+        return AIAnalyzerService.HADITHS[3] if len(AIAnalyzerService.HADITHS) > 3 else AIAnalyzerService.HADITHS[0]
+    
+    @staticmethod
+    def find_best_match_by_keywords(question: str) -> dict:
+        """
+        Fallback keyword-based matching when AI is unavailable
+        """
+        question_lower = question.lower()
+        
+        # Score each ayah based on keyword matches
+        best_ayah = None
+        best_ayah_score = 0
+        for ayah in AIAnalyzerService.QURAN_AYAHS:
+            score = sum(1 for kw in ayah["keywords"] if kw.lower() in question_lower)
+            if score > best_ayah_score:
+                best_ayah_score = score
+                best_ayah = ayah
+        
+        # Score each hadith based on keyword matches
+        best_hadith = None
+        best_hadith_score = 0
+        for hadith in AIAnalyzerService.HADITHS:
+            score = sum(1 for kw in hadith["keywords"] if kw.lower() in question_lower)
+            if score > best_hadith_score:
+                best_hadith_score = score
+                best_hadith = hadith
+        
+        # Use defaults if no matches found
+        if not best_ayah or best_ayah_score == 0:
+            best_ayah = AIAnalyzerService.QURAN_AYAHS[2]  # With hardship comes ease
+        if not best_hadith or best_hadith_score == 0:
+            best_hadith = AIAnalyzerService.HADITHS[3]  # Patience hadith
+        
+        return {
+            "ayah": best_ayah,
+            "hadith": best_hadith,
+            "ai_explanation": f"Based on your question about '{question[:50]}...', here is guidance from the Quran and Sunnah.",
             "ai_generated": False
         }

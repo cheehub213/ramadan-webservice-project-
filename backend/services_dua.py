@@ -6,6 +6,7 @@ from datetime import datetime
 import json
 import httpx
 import os
+import random
 from typing import Optional
 from pathlib import Path
 from dotenv import load_dotenv
@@ -38,49 +39,101 @@ class DuaService:
         "Personal Challenges"
     ]
     
+    # Different styles/tones for variety
+    DUA_STYLES = [
+        "humble and desperate plea",
+        "confident trust in Allah's mercy",
+        "reflective and contemplative",
+        "urgent and heartfelt",
+        "peaceful and accepting"
+    ]
+    
+    # Different opening phrases
+    OPENINGS = [
+        "O Allah, the Most Merciful",
+        "Ya Rahman, Ya Raheem",
+        "O Lord of the Worlds",
+        "O Allah, the All-Hearing, All-Knowing",
+        "Ya Hayyu Ya Qayyum",
+        "O the Turner of Hearts",
+        "Ya Rabb",
+        "O Allah, my Lord and the Lord of all creation"
+    ]
+    
+    OPENINGS_AR = [
+        "اللهم يا أرحم الراحمين",
+        "يا رحمن يا رحيم",
+        "يا رب العالمين",
+        "اللهم يا سميع يا عليم",
+        "يا حي يا قيوم",
+        "يا مقلب القلوب",
+        "يا رب",
+        "اللهم ربي ورب كل شيء"
+    ]
+    
     @staticmethod
     def get_categories():
         """Get all dua categories"""
         return DuaService.DUA_CATEGORIES
     
     @staticmethod
-    async def generate_dua_with_ai(category: str, context: str) -> dict:
+    async def generate_dua(category: str, context: str) -> dict:
         """
-        Generate a truly personalized dua using DeepSeek AI.
-        The AI analyzes the user's specific situation and creates a dua
-        that directly addresses their exact concern.
+        Generate a truly personalized dua using Groq AI.
+        Each call generates a unique dua based on the user's specific situation.
         """
         
-        # Create a detailed prompt for DeepSeek to generate personalized dua
-        system_prompt = """You are an Islamic scholar assistant specialized in creating personalized duas (supplications to Allah).
+        # Select random style and opening for variety
+        style = random.choice(DuaService.DUA_STYLES)
+        opening_idx = random.randint(0, len(DuaService.OPENINGS) - 1)
+        opening_en = DuaService.OPENINGS[opening_idx]
+        opening_ar = DuaService.OPENINGS_AR[opening_idx]
+        
+        # Random elements for variety
+        structure_type = random.choice([
+            "Start with praise, then the specific request, then trust in Allah",
+            "Start with acknowledging weakness, then seeking strength",
+            "Start with the urgent need, then hope in Allah's mercy",
+            "Start with Allah's names relevant to the need, then the request"
+        ])
+        
+        # Create a unique prompt for truly personalized dua
+        system_prompt = f"""You are a compassionate Islamic scholar creating duas (supplications to Allah).
 
-Your task is to create a heartfelt, sincere dua that DIRECTLY addresses the user's SPECIFIC situation.
+FOR THE ENGLISH DUA:
+- Maximum 3-4 sentences
+- Start with: "{opening_en}"
+- Use a {style} tone
+- Address the person's situation directly
 
-IMPORTANT RULES:
-1. The dua must be SPECIFIC to what the user described - not generic
-2. If they say "I fear going to hell" - the dua should be about seeking Allah's mercy and protection from hellfire, NOT about general fear
-3. If they say "I'm worried about my exam tomorrow" - the dua should mention seeking success in exams, NOT general worry
-4. Include the user's EXACT concern in the dua
-5. Make it sound like a sincere supplication, starting with "O Allah" or "Ya Allah"
-6. Keep it concise but meaningful (3-5 sentences)
-7. Be empathetic and understanding of their specific situation
+FOR THE ARABIC DUA (دعاء بالعربية):
+- ABSOLUTELY NO ENGLISH WORDS - أي كلمة إنجليزية ممنوعة تماماً
+- Write ONLY Arabic letters (ا ب ت ث ج ح خ...)
+- Maximum 3-4 sentences
+- Start with: "{opening_ar}"
+- Use classical Arabic (فصحى)
+- End with آمين
 
-OUTPUT FORMAT - Return ONLY valid JSON with this exact structure:
-{
-    "dua_text_en": "The English dua here...",
-    "dua_text_ar": "The Arabic dua here...",
-    "how_to_use_en": "Brief guidance on when/how to recite this dua...",
-    "how_to_use_ar": "Arabic guidance..."
-}"""
+⚠️ ARABIC MUST BE 100% ARABIC SCRIPT ONLY ⚠️
+❌ FORBIDDEN: Any Latin/English letters in Arabic dua
+✅ CORRECT: اللهم ارزقني الصبر والقوة آمين
+❌ WRONG: اللهم help me أو grant me رزق
 
-        user_prompt = f"""Create a personalized dua for someone who says:
+OUTPUT - Return ONLY this JSON format:
+{{
+    "dua_text_en": "English dua here...",
+    "dua_text_ar": "الدعاء بالعربية فقط هنا...",
+    "how_to_use_en": "Brief guidance...",
+    "how_to_use_ar": "إرشادات مختصرة..."
+}}"""
 
-Category: {category}
-Their situation: "{context}"
+        user_prompt = f"""Create a personalized dua for someone facing: {category} - {context}
 
-Remember: The dua must DIRECTLY address their specific situation "{context}" - not a generic dua about {category}.
+IMPORTANT:
+- English dua: 3-4 sentences, ends with "Ameen"
+- Arabic dua: 3-4 sentences, ONLY ARABIC LETTERS (no English at all), ends with آمين
 
-Generate a sincere, heartfelt dua that speaks directly to what they described."""
+Generate the JSON now:"""
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -96,8 +149,8 @@ Generate a sincere, heartfelt dua that speaks directly to what they described.""
                             {"role": "system", "content": system_prompt},
                             {"role": "user", "content": user_prompt}
                         ],
-                        "temperature": 0.7,
-                        "max_tokens": 1000
+                        "temperature": 0.8,
+                        "max_tokens": 800
                     }
                 )
                 
@@ -127,6 +180,7 @@ Generate a sincere, heartfelt dua that speaks directly to what they described.""
                             "how_to_use_en": dua_data.get("how_to_use_en", "Recite with sincere intention after prayers."),
                             "how_to_use_ar": dua_data.get("how_to_use_ar", "اقرأ بنية صادقة بعد الصلاة."),
                             "ai_generated": True,
+                            "style_used": style,
                             "timestamp": datetime.now().isoformat()
                         }
                     except json.JSONDecodeError:
@@ -149,14 +203,6 @@ Generate a sincere, heartfelt dua that speaks directly to what they described.""
         except Exception as e:
             print(f"Error calling Groq API: {str(e)}")
             return DuaService._generate_intelligent_fallback(category, context)
-    
-    @staticmethod
-    def generate_dua(category: str, context: str) -> dict:
-        """
-        Synchronous version - generates personalized dua using intelligent template.
-        For async AI generation, use generate_dua_with_ai().
-        """
-        return DuaService._generate_intelligent_fallback(category, context)
     
     @staticmethod
     def _generate_intelligent_fallback(category: str, context: str) -> dict:

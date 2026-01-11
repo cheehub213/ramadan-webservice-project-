@@ -11,12 +11,55 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
     name = Column(String, nullable=True)
-    user_type = Column(String)  # "user" or "imam"
+    password_hash = Column(String, nullable=True)  # For JWT authentication
+    user_type = Column(String, default="user")  # "user", "imam", or "admin"
+    is_verified = Column(Boolean, default=False)  # Must verify email first
+    is_active = Column(Boolean, default=True)
+    last_login = Column(DateTime, nullable=True)
+    login_attempts = Column(Integer, default=0)
+    locked_until = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
     
     duas = relationship("DuaHistory", back_populates="user")
     conversations = relationship("Conversation", back_populates="user")
+
+
+# ============= TOKEN BLACKLIST (for logout/revocation) =============
+class TokenBlacklist(Base):
+    __tablename__ = "token_blacklist"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    token_jti = Column(String, unique=True, index=True)  # JWT ID
+    user_email = Column(String, index=True)
+    token_type = Column(String)  # "access" or "refresh"
+    expires_at = Column(DateTime)
+    blacklisted_at = Column(DateTime, server_default=func.now())
+
+
+# ============= PASSWORD RESET TOKENS =============
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_email = Column(String, index=True)
+    token = Column(String, unique=True, index=True)
+    expires_at = Column(DateTime)
+    used = Column(Boolean, default=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+# ============= EMAIL VERIFICATION TOKENS =============
+class EmailVerificationToken(Base):
+    __tablename__ = "email_verification_tokens"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_email = Column(String, index=True)
+    token = Column(String, unique=True, index=True)
+    expires_at = Column(DateTime)
+    used = Column(Boolean, default=False)
+    created_at = Column(DateTime, server_default=func.now())
+
     
 # ============= DUA MODELS =============
 class DuaHistory(Base):
@@ -116,4 +159,23 @@ class UserHistory(Base):
     user_email = Column(String, index=True)
     action_type = Column(String)  # "dua_generated", "video_searched", "chat_created", etc
     action_data = Column(JSON)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+# ============= EVENTS MODELS (Tunisia) =============
+class Event(Base):
+    __tablename__ = "events"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text)
+    city = Column(String(100), nullable=False)
+    location = Column(String(200))
+    category = Column(String(50))
+    event_date = Column(DateTime, nullable=False)
+    start_time = Column(String(20))
+    end_time = Column(String(20))
+    organizer_name = Column(String(100))
+    organizer_contact = Column(String(100))
+    is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime, server_default=func.now())

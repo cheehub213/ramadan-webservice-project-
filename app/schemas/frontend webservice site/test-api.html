@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .result { background: #f0f0f0; padding: 15px; margin-top: 10px; border-radius: 5px; white-space: pre-wrap; }
+        button { padding: 10px 20px; margin-right: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>API Test - Chat with Imam</h1>
+    <button onclick="testImamsEndpoint()">Test /api/chat/imams</button>
+    <button onclick="testHealthEndpoint()">Test /api/health</button>
+    <div id="result" class="result">Results will appear here...</div>
+
+    <script>
+        const API_BASE_URL = "http://localhost:8000";
+
+        async function testImamsEndpoint() {
+            const url = `${API_BASE_URL}/api/chat/imams`;
+            console.log('Testing:', url);
+            document.getElementById('result').textContent = `Loading ${url}...`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                document.getElementById('result').textContent = 
+                    `Status: ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                document.getElementById('result').textContent = 
+                    `Error: ${error.message}\n\nFull error:\n${JSON.stringify(error, null, 2)}`;
+            }
+        }
+
+        async function testHealthEndpoint() {
+            const url = `${API_BASE_URL}/api/health`;
+            console.log('Testing:', url);
+            document.getElementById('result').textContent = `Loading ${url}...`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                document.getElementById('result').textContent = 
+                    `Status: ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                document.getElementById('result').textContent = 
+                    `Error: ${error.message}\n\nFull error:\n${JSON.stringify(error, null, 2)}`;
+            }
+        }
+    </script>
+</body>
+</html>
