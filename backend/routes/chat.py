@@ -1,5 +1,5 @@
 """
-Chat with Imam Routes
+Chat with Imam Routes - Protected endpoints requiring authentication
 """
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
@@ -7,10 +7,11 @@ from datetime import datetime
 from typing import List
 
 from database import SessionLocal
-from models_extended import Imam, Conversation, Message
+from models_extended import Imam, Conversation, Message, User
 from schemas.chat import (
     ImamResponse, ConversationCreateRequest, MessageSendRequest, MessageResponse
 )
+from .auth import get_current_user, get_current_user_optional
 
 router = APIRouter()
 
@@ -25,7 +26,7 @@ def get_db():
 
 @router.get("/imams", response_model=List[ImamResponse])
 async def get_all_imams(db: Session = Depends(get_db)):
-    """Get all available imams"""
+    """Get all available imams (public)"""
     imams = db.query(Imam).filter(Imam.is_available == True).all()
     
     # Create default imams if none exist
@@ -62,13 +63,18 @@ async def get_all_imams(db: Session = Depends(get_db)):
 
 
 @router.post("/conversations")
-async def create_conversation(request: ConversationCreateRequest, db: Session = Depends(get_db)):
-    """Create a new conversation with an imam (public - no auth required)"""
+async def create_conversation(
+    request: ConversationCreateRequest, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new conversation with an imam (requires authentication)"""
     imam = db.query(Imam).filter(Imam.id == request.imam_id).first()
     if not imam:
         raise HTTPException(status_code=404, detail="Imam not found")
     
-    user_email = request.user_email or "guest@app.local"
+    # Use authenticated user's email
+    user_email = current_user.email
     
     conversation = Conversation(
         user_email=user_email,
@@ -89,8 +95,16 @@ async def create_conversation(request: ConversationCreateRequest, db: Session = 
 
 
 @router.get("/conversations/{user_email}")
-async def get_user_conversations(user_email: str, db: Session = Depends(get_db)):
-    """Get conversations for a user by email (public)"""
+async def get_user_conversations(
+    user_email: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get conversations for a user by email (requires authentication, users can only access their own)"""
+    # Users can only access their own conversations, admins/imams can access any
+    if current_user.user_type not in ["admin", "imam"] and current_user.email != user_email:
+        raise HTTPException(status_code=403, detail="Access denied. You can only view your own conversations.")
+    
     conversations = db.query(Conversation).filter(
         Conversation.user_email == user_email
     ).order_by(Conversation.updated_at.desc()).all()
@@ -118,8 +132,18 @@ async def get_user_conversations(user_email: str, db: Session = Depends(get_db))
 
 
 @router.get("/imam-conversations/{imam_email}")
-async def get_imam_conversations(imam_email: str, db: Session = Depends(get_db)):
-    """Get conversations for a specific imam by email"""
+async def get_imam_conversations(
+    imam_email: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get conversations for a specific imam by email (requires imam or admin)"""
+    # Only imams can access their own conversations, admins can access any
+    if current_user.user_type == "imam" and current_user.email != imam_email:
+        raise HTTPException(status_code=403, detail="Access denied. You can only view your own conversations.")
+    elif current_user.user_type not in ["admin", "imam"]:
+        raise HTTPException(status_code=403, detail="Access denied. Imam or admin role required.")
+    
     imam = db.query(Imam).filter(Imam.email == imam_email).first()
     if not imam:
         return []
@@ -157,8 +181,14 @@ async def get_imam_conversations(imam_email: str, db: Session = Depends(get_db))
 
 
 @router.get("/all-conversations")
-async def get_all_conversations(db: Session = Depends(get_db)):
-    """Get all conversations (for Imam dashboard - public)"""
+async def get_all_conversations(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all conversations (requires imam or admin role)"""
+    if current_user.user_type not in ["admin", "imam"]:
+        raise HTTPException(status_code=403, detail="Access denied. Imam or admin role required.")
+    
     conversations = db.query(Conversation).order_by(Conversation.updated_at.desc()).all()
     
     result = []
@@ -191,16 +221,28 @@ async def get_all_conversations(db: Session = Depends(get_db)):
 
 
 @router.post("/messages")
-async def send_message(request: MessageSendRequest, db: Session = Depends(get_db)):
-    """Send a message in a conversation (public - no auth required)"""
+async def send_message(
+    request: MessageSendRequest, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Send a message in a conversation (requires authentication)"""
     conversation = db.query(Conversation).filter(
         Conversation.id == request.conversation_id
     ).first()
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     
-    sender_email = request.sender_email or "guest@app.local"
-    sender_type = request.sender_type or "user"
+    # Verify user has access to this conversation
+    is_participant = (
+        conversation.user_email == current_user.email or
+        current_user.user_type in ["admin", "imam"]
+    )
+    if not is_participant:
+        raise HTTPException(status_code=403, detail="Access denied. Not a participant in this conversation.")
+    
+    sender_email = current_user.email
+    sender_type = "imam" if current_user.user_type == "imam" else "user"
     
     message = Message(
         conversation_id=request.conversation_id,
@@ -226,12 +268,28 @@ async def send_message(request: MessageSendRequest, db: Session = Depends(get_db
 
 
 @router.get("/messages/{conversation_id}")
-async def get_messages(conversation_id: int, db: Session = Depends(get_db)):
-    """Get messages in a conversation (public)"""
+async def get_messages(
+    conversation_id: int, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get messages in a conversation (requires authentication)"""
+    conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    # Verify user has access to this conversation
+    is_participant = (
+        conversation.user_email == current_user.email or
+        current_user.user_type in ["admin", "imam"]
+    )
+    if not is_participant:
+        raise HTTPException(status_code=403, detail="Access denied. Not a participant in this conversation.")
+    
     messages = db.query(Message).filter(
         Message.conversation_id == conversation_id
     ).order_by(Message.created_at).all()
-    
+
     return {
         "messages": [
             {
@@ -248,8 +306,25 @@ async def get_messages(conversation_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/messages/{conversation_id}/read")
-async def mark_messages_read(conversation_id: int, reader_type: str = "user", db: Session = Depends(get_db)):
-    """Mark messages as read when user/imam opens conversation"""
+async def mark_messages_read(
+    conversation_id: int, 
+    reader_type: str = "user", 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Mark messages as read when user/imam opens conversation (requires authentication)"""
+    conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    # Verify user has access to this conversation
+    is_participant = (
+        conversation.user_email == current_user.email or
+        current_user.user_type in ["admin", "imam"]
+    )
+    if not is_participant:
+        raise HTTPException(status_code=403, detail="Access denied. Not a participant in this conversation.")
+    
     # Mark messages from the other party as read
     other_type = "imam" if reader_type == "user" else "user"
     db.query(Message).filter(

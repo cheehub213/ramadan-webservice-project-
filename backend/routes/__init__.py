@@ -8,6 +8,7 @@ from .chat import router as chat_router
 from .analyzer import router as analyzer_router
 from .events import router as events_router
 from .videos import router as videos_router
+from .admin import router as admin_router
 
 # Main API router
 api_router = APIRouter(prefix="/api")
@@ -19,5 +20,6 @@ api_router.include_router(chat_router, prefix="/chat", tags=["Chat with Imam"])
 api_router.include_router(analyzer_router, prefix="/analyzer", tags=["AI Analyzer"])
 api_router.include_router(events_router, prefix="/events", tags=["Events"])
 api_router.include_router(videos_router, prefix="/videos", tags=["Islamic Videos"])
+api_router.include_router(admin_router, prefix="/admin", tags=["Admin"])
 
 __all__ = ["api_router"]

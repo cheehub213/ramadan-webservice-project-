@@ -712,8 +712,12 @@
         // Get auth headers for API calls
         function getAuthHeaders() {
             const headers = { 'Content-Type': 'application/json' };
-            if (authToken) {
-                headers['Authorization'] = `Bearer ${authToken}`;
+            // Check both variable and localStorage for auth token
+            const token = authToken || localStorage.getItem('authToken');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+                // Sync to variable if needed
+                if (!authToken) authToken = token;
             }
             return headers;
         }
@@ -1647,7 +1651,7 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/dua/generate`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({ email: userEmail || 'guest@app.local', category, context })
                 });
 
@@ -1703,7 +1707,7 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/analyzer/analyze`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     // Backend expects `question` field per AnalyzeRequest schema
                     body: JSON.stringify({ question: prompt, email: userEmail || 'guest@app.local' })
                 });
@@ -1793,7 +1797,7 @@
                 try {
                     const aiResponse = await fetch(`${API_BASE_URL}/videos/search-by-prompt`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: getAuthHeaders(),
                         body: JSON.stringify({ email: userEmail || 'guest@app.local', prompt })
                     });
                     
@@ -1943,7 +1947,9 @@
             container.innerHTML = '<p class="text-gray-400 italic">Loading conversations...</p>';
             try {
                 console.log('Loading conversations for:', userEmail || 'guest@app.local');
-                const response = await fetch(`${API_BASE_URL}/chat/conversations/${encodeURIComponent(userEmail || 'guest@app.local')}`);
+                const response = await fetch(`${API_BASE_URL}/chat/conversations/${encodeURIComponent(userEmail || 'guest@app.local')}`, {
+                    headers: getAuthHeaders()
+                });
                 console.log('Conversations response status:', response.status);
                 if (response.ok) {
                     const conversations = await response.json();
@@ -2009,7 +2015,9 @@
             
             try {
                 // Get conversations for this specific imam
-                const response = await fetch(`${API_BASE_URL}/chat/imam-conversations/${encodeURIComponent(imamEmail)}`);
+                const response = await fetch(`${API_BASE_URL}/chat/imam-conversations/${encodeURIComponent(imamEmail)}`, {
+                    headers: getAuthHeaders()
+                });
                 if (response.ok) {
                     const conversations = await response.json();
                     if (conversations.length === 0) {
@@ -2063,7 +2071,7 @@
                 // Create conversation
                 const convResponse = await fetch(`${API_BASE_URL}/chat/conversations`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({
                         user_email: userEmail || 'guest@app.local',
                         imam_id: parseInt(imamId),
@@ -2077,7 +2085,7 @@
                     // Send initial message
                     await fetch(`${API_BASE_URL}/chat/messages`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: getAuthHeaders(),
                         body: JSON.stringify({
                             conversation_id: conv.id,
                             sender_email: userEmail || 'guest@app.local',
@@ -2169,7 +2177,9 @@
         async function loadMessages(conversationId, containerId) {
             const container = document.getElementById(containerId);
             try {
-                const response = await fetch(`${API_BASE_URL}/chat/messages/${conversationId}`);
+                const response = await fetch(`${API_BASE_URL}/chat/messages/${conversationId}`, {
+                    headers: getAuthHeaders()
+                });
                 if (response.ok) {
                     const data = await response.json();
                     const messages = data.messages || [];
@@ -2210,7 +2220,7 @@
             try {
                 await fetch(`${API_BASE_URL}/chat/messages`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({
                         conversation_id: currentConversationId,
                         sender_email: userEmail || 'guest@app.local',
@@ -2234,7 +2244,7 @@
             try {
                 await fetch(`${API_BASE_URL}/chat/messages`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({
                         conversation_id: currentConversationId,
                         sender_email: currentImam.email,
@@ -2434,9 +2444,15 @@
         async function submitEvent(e) {
             if (e) e.preventDefault();
             
-            if (!authToken) {
+            // Check both variable and localStorage for auth token
+            const token = authToken || localStorage.getItem('authToken');
+            if (!token) {
                 alert('Please login to post an event');
                 return;
+            }
+            // Update authToken if it was only in localStorage
+            if (!authToken && token) {
+                authToken = token;
             }
             
             // Find the submit button - works for both onclick and form submit

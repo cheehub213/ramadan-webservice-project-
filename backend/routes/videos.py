@@ -1,12 +1,14 @@
 """
-Videos Routes (YouTube Search)
+Videos Routes (YouTube Search) - Protected endpoints requiring authentication
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
 import os
 import httpx
 
 from schemas.videos import VideoSearchRequest, VideoResponse
+from .auth import get_current_user
+from models_extended import User
 
 router = APIRouter()
 
@@ -15,8 +17,11 @@ YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
 
 @router.post("/search")
 @router.post("/search-by-prompt")
-async def search_videos(request: VideoSearchRequest):
-    """Search YouTube for Islamic videos"""
+async def search_videos(
+    request: VideoSearchRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """Search YouTube for Islamic videos (requires authentication)"""
     try:
         query = request.prompt  # Use prompt field from request
         max_results = request.max_results or 10
@@ -64,8 +69,11 @@ async def search_videos(request: VideoSearchRequest):
 
 
 @router.get("/curated")
-async def get_curated_list(category: Optional[str] = None):
-    """Get curated Islamic videos"""
+async def get_curated_list(
+    category: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Get curated Islamic videos (requires authentication)"""
     videos = get_curated_videos(category or "ramadan")
     return {"videos": videos}
 

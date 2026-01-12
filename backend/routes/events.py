@@ -1,5 +1,5 @@
 """
-Events Routes (Tunisia Local Events)
+Events Routes (Tunisia Local Events) - Protected endpoints requiring authentication
 """
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
@@ -7,8 +7,9 @@ from datetime import datetime, date
 from typing import List, Optional
 
 from database import SessionLocal
-from models_extended import Event
+from models_extended import Event, User
 from schemas.events import EventCreateRequest, EventResponse, TUNISIA_CITIES, EVENT_CATEGORIES
+from .auth import get_current_user, get_current_user_optional
 
 router = APIRouter()
 
@@ -23,20 +24,24 @@ def get_db():
 
 @router.get("/cities")
 async def get_cities():
-    """Get list of Tunisia cities for events"""
+    """Get list of Tunisia cities for events (public)"""
     return {"cities": TUNISIA_CITIES}
 
 
 @router.get("/categories")
 async def get_categories():
-    """Get list of event categories"""
+    """Get list of event categories (public)"""
     return {"categories": EVENT_CATEGORIES}
 
 
 @router.post("/", response_model=EventResponse)
 @router.post("", response_model=EventResponse, include_in_schema=False)
-async def create_event(request: EventCreateRequest, db: Session = Depends(get_db)):
-    """Create a new event"""
+async def create_event(
+    request: EventCreateRequest, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new event (requires authentication)"""
     # Handle different field name variations from frontend
     start_time = request.start_time or request.event_time
     organizer_contact = request.organizer_contact or request.contact_info or request.contact_phone
@@ -48,6 +53,9 @@ async def create_event(request: EventCreateRequest, db: Session = Depends(get_db
     except ValueError:
         event_date_obj = datetime.now().date()
     
+    # Use authenticated user's info as organizer if not provided
+    organizer_name = request.organizer_name or current_user.full_name or current_user.email
+    
     event = Event(
         title=request.title,
         description=request.description or "",
@@ -57,7 +65,7 @@ async def create_event(request: EventCreateRequest, db: Session = Depends(get_db
         event_date=event_date_obj,
         start_time=start_time,
         end_time=request.end_time,
-        organizer_name=request.organizer_name or "Anonymous",
+        organizer_name=organizer_name,
         organizer_contact=organizer_contact,
         is_verified=False
     )
