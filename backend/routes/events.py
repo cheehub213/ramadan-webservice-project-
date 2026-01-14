@@ -54,7 +54,7 @@ async def create_event(
         event_date_obj = datetime.now().date()
     
     # Use authenticated user's info as organizer if not provided
-    organizer_name = request.organizer_name or current_user.full_name or current_user.email
+    organizer_name = request.organizer_name or current_user.name or current_user.email
     
     event = Event(
         title=request.title,
@@ -67,7 +67,8 @@ async def create_event(
         end_time=request.end_time,
         organizer_name=organizer_name,
         organizer_contact=organizer_contact,
-        is_verified=False
+        is_verified=False,
+        is_featured=is_featured
     )
     db.add(event)
     db.commit()
@@ -109,9 +110,8 @@ async def get_events(
     if category:
         query = query.filter(Event.category == category)
     
-    # Only show future events
-    query = query.filter(Event.event_date >= datetime.now().date())
-    events = query.order_by(Event.event_date).all()
+    # Show all events, ordered by date (newest first)
+    events = query.order_by(Event.event_date.desc()).all()
     
     return {
         "events": [
@@ -127,7 +127,8 @@ async def get_events(
                 "end_time": e.end_time,
                 "organizer_name": e.organizer_name,
                 "organizer_contact": e.organizer_contact,
-                "is_verified": e.is_verified
+                "is_verified": e.is_verified,
+                "is_featured": getattr(e, 'is_featured', False)
             }
             for e in events
         ]

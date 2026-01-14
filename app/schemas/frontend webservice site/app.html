@@ -2307,7 +2307,8 @@
 
         // Load events from API
         async function loadEvents() {
-            const container = document.getElementById('eventsContainer');
+            const container = document.getElementById('eventsList');
+            const featuredContainer = document.getElementById('featuredEventsList');
             if (!container) return;
             
             container.innerHTML = '<div class="col-span-full text-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-ramadan-gold mx-auto"></div><p class="text-gray-400 mt-4">Loading events...</p></div>';
@@ -2316,9 +2317,12 @@
                 const cityFilter = document.getElementById('eventCityFilter')?.value || '';
                 const categoryFilter = document.getElementById('eventCategoryFilter')?.value || '';
                 
-                let url = `${API_BASE_URL}/events?`;
-                if (cityFilter) url += `city=${encodeURIComponent(cityFilter)}&`;
-                if (categoryFilter) url += `category=${encodeURIComponent(categoryFilter)}`;
+                let url = `${API_BASE_URL}/events/`;
+                if (cityFilter || categoryFilter) {
+                    url += '?';
+                    if (cityFilter) url += `city=${encodeURIComponent(cityFilter)}&`;
+                    if (categoryFilter) url += `category=${encodeURIComponent(categoryFilter)}`;
+                }
                 
                 const response = await fetch(url);
                 if (response.ok) {
@@ -2336,10 +2340,25 @@
 
         // Render events cards
         function renderEvents() {
-            const container = document.getElementById('eventsContainer');
+            const container = document.getElementById('eventsList');
+            const featuredContainer = document.getElementById('featuredEventsList');
             if (!container) return;
             
-            if (eventsData.length === 0) {
+            // Separate featured and regular events
+            const featuredEvents = eventsData.filter(e => e.is_featured);
+            const regularEvents = eventsData.filter(e => !e.is_featured);
+            
+            // Render featured events
+            if (featuredContainer) {
+                if (featuredEvents.length === 0) {
+                    featuredContainer.innerHTML = '<p class="text-gray-400 col-span-2">No featured events yet</p>';
+                } else {
+                    featuredContainer.innerHTML = featuredEvents.map(event => renderEventCard(event)).join('');
+                }
+            }
+            
+            // Render regular events
+            if (regularEvents.length === 0 && featuredEvents.length === 0) {
                 container.innerHTML = `
                     <div class="col-span-full text-center py-12">
                         <p class="text-6xl mb-4">🌙</p>
@@ -2350,7 +2369,11 @@
                 return;
             }
             
-            container.innerHTML = eventsData.map(event => renderEventCard(event)).join('');
+            if (regularEvents.length === 0) {
+                container.innerHTML = '<p class="text-gray-400">All events are featured above!</p>';
+            } else {
+                container.innerHTML = regularEvents.map(event => renderEventCard(event)).join('');
+            }
         }
 
         // Render single event card

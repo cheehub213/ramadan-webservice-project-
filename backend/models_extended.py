@@ -178,4 +178,5 @@ class Event(Base):
     organizer_name = Column(String(100))
     organizer_contact = Column(String(100))
     is_verified = Column(Boolean, default=False)
+    is_featured = Column(Boolean, default=False)
     created_at = Column(DateTime, server_default=func.now())
