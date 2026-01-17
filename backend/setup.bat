@@ -1,9 +1,9 @@
 @echo off
-REM Ramadan Helper - Quick Start Script for Windows
+REM myRamadan - Quick Start Script for Windows
 
 echo.
 echo ========================================
-echo Ramadan Helper - Backend Setup
+echo myRamadan - Backend Setup
 echo ========================================
 echo.
 

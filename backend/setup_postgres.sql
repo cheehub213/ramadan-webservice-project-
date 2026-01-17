@@ -1,4 +1,4 @@
--- PostgreSQL Setup Script for Ramadan Helper
+-- PostgreSQL Setup Script for myRamadan
 -- Run this in PostgreSQL to create the database and user
 
 -- Create user (if not exists)

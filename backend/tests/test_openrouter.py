@@ -15,7 +15,7 @@ headers = {
     "Content-Type": "application/json",
     "Authorization": f"Bearer {api_key}",
     "HTTP-Referer": "http://localhost:8000",
-    "X-Title": "Ramadan Helper"
+    "X-Title": "myRamadan"
 }
 
 data = {

@@ -1,5 +1,5 @@
 """
-Pydantic Schemas for Ramadan Helper API
+Pydantic Schemas for myRamadan API
 """
 from .auth import Token, TokenData, UserSignupRequest, UserLoginRequest, UserResponse
 from .dua import DuaGenerateRequest, DuaHistoryResponse

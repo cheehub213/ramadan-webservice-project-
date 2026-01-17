@@ -1,5 +1,5 @@
 """
-Complete API Routes for Ramadan Helper
+Complete API Routes for myRamadan
 Includes: Users, Dua, Chat, AI Analyzer, Videos, History
 """
 from fastapi import APIRouter, HTTPException, Depends

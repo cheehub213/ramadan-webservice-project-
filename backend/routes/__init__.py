@@ -1,5 +1,5 @@
 """
-Routes Package - Modular API Routes for Ramadan Helper
+Routes Package - Modular API Routes for myRamadan
 """
 from fastapi import APIRouter
 from .auth import router as auth_router

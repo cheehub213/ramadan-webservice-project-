@@ -1,5 +1,5 @@
 // =====================================================
-// API SERVICE MODULE FOR RAMADAN HELPER FRONTEND
+// API SERVICE MODULE FOR MYRAMADAN FRONTEND
 // =====================================================
 // File: /js/api-service.js
 // Purpose: Centralized API client for all backend calls
@@ -8,7 +8,7 @@
 const API_BASE = 'http://localhost:8000/api';
 
 /**
- * Comprehensive API Service for Ramadan Helper
+ * Comprehensive API Service for myRamadan
  * All backend endpoint calls go through this module
  */
 const apiService = {

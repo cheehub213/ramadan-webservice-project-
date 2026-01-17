@@ -11,7 +11,7 @@ class Settings:
     YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
     
     # FastAPI
-    API_TITLE = "Ramadan Helper API"
+    API_TITLE = "myRamadan API"
     API_VERSION = "1.0.0"
     DEBUG = os.getenv("DEBUG", "True") == "True"
     

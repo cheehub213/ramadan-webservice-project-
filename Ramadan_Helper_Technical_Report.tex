@@ -1,0 +1,787 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{float}
+\usepackage{parskip}
+\usepackage{setspace}
+
+% Set line spacing
+\singlespacing
+
+% Page geometry
+\geometry{margin=0.85in}
+
+% Colors
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+
+% Code listing style
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=single
+}
+\lstset{style=mystyle}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Ramadan Helper Application}
+\fancyhead[R]{Technical Report}
+\fancyfoot[C]{\thepage}
+
+% Title formatting
+\titleformat{\section}{\Large\bfseries\color{darkgreen}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{darkgreen!80}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{darkgreen!60}}{\thesubsubsection}{1em}{}
+
+% Hyperlink setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=darkgreen,
+    filecolor=magenta,
+    urlcolor=blue,
+}
+
+\begin{document}
+
+% Title Page
+\begin{titlepage}
+    \centering
+    
+    % University/Institution Header (optional - customize as needed)
+    \vspace*{0.5cm}
+    {\large\textsc{Web Services Development Project}\par}
+    \vspace{0.3cm}
+    {\large Academic Year 2025-2026\par}
+    
+    \vspace{1.5cm}
+    
+    % Decorative line
+    \rule{\textwidth}{1.5pt}
+    \vspace{0.5cm}
+    
+    % Title
+    {\Huge\bfseries Ramadan Helper Application\par}
+    \vspace{0.3cm}
+    {\LARGE RESTful API Technical Report\par}
+    
+    \vspace{0.5cm}
+    \rule{\textwidth}{1.5pt}
+    
+    \vspace{2cm}
+    
+    % Author and Supervisor
+    \begin{minipage}[t]{0.45\textwidth}
+        \begin{flushleft}
+            \large\textbf{Author:}\\
+            \large Chiheb Bahri
+        \end{flushleft}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \begin{flushright}
+            \large\textbf{Supervisor:}\\
+            \large Montassar Ben Messaoud
+        \end{flushright}
+    \end{minipage}
+    
+    \vspace{3cm}
+    
+    % Project Description
+    \begin{tcolorbox}[colback=green!5!white, colframe=darkgreen, title=Project Overview]
+        A comprehensive web application providing Islamic guidance and community features for the holy month of Ramadan. Built with FastAPI backend and modern frontend technologies, featuring AI-powered assistance, event management, and secure user authentication.
+    \end{tcolorbox}
+    
+    \vfill
+    
+    % Footer information
+    {\large Version 1.0 - Final Release\par}
+    \vspace{0.3cm}
+    {\large January 2026\par}
+    \vspace{0.5cm}
+    {\small\textbf{Repository:} \url{https://github.com/cheehub213/ramadan-webservice-project-}\par}
+    
+\end{titlepage}
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% Introduction
+\section{Introduction}
+
+\subsection{Context and Motivation}
+The holy month of Ramadan is a significant period for Muslims worldwide. With increasing digitalization, there is a growing need for accessible digital platforms to assist Muslims during Ramadan. This project develops a comprehensive web application combining modern web technologies with Islamic knowledge resources.
+
+\subsection{Project Objectives}
+\begin{enumerate}[noitemsep]
+    \item \textbf{AI-Powered Islamic Guidance:} Generate contextually appropriate duas and answer Islamic questions.
+    \item \textbf{Community Event Management:} Platform for discovering and sharing community events.
+    \item \textbf{Secure User Authentication:} Robust authentication with email verification.
+    \item \textbf{RESTful API:} Well-documented API following industry best practices.
+\end{enumerate}
+
+\subsection{Scope}
+This report covers: system architecture, API specifications, database schema, security implementation, external services integration, and deployment procedures.
+
+% Executive Summary
+\section{Executive Summary}
+
+The Ramadan Helper Application is a full-stack web platform providing AI-powered Islamic guidance, community event management, and secure user authentication. Built with FastAPI backend and responsive SPA frontend.
+
+\subsection{Key Features}
+\begin{itemize}[noitemsep]
+    \item \textbf{AI-Powered Dua Generation}: Personalized supplications using Groq AI
+    \item \textbf{Quran Search}: Semantic search across Quran verses
+    \item \textbf{Community Events}: Create and discover local Ramadan events
+    \item \textbf{User Authentication}: JWT-based auth with email verification
+    \item \textbf{Admin Dashboard}: Administrative control panel
+\end{itemize}
+
+\subsection{Technology Stack}
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Component} & \textbf{Technology} \\
+\midrule
+Backend & FastAPI 0.104.1 (Python 3.12) \\
+Database & SQLite + SQLAlchemy ORM \\
+Authentication & JWT + bcrypt \\
+AI Service & Groq API \\
+Email & Gmail SMTP \\
+Frontend & HTML5, CSS3, JavaScript \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% System Architecture
+\section{System Architecture}
+
+\subsection{Overview}
+The application follows a three-tier architecture: presentation layer (frontend SPA), business logic layer (FastAPI backend), and data access layer (SQLAlchemy ORM with SQLite).
+
+\begin{verbatim}
++------------+     +------------+     +----------+
+|  Frontend  |<--->|  Backend   |<--->| Database |
+|  (8080)    |     |  (8000)    |     | (SQLite) |
++------------+     +-----+------+     +----------+
+                        |
+              +---------+---------+
+              | External Services |
+              | Groq AI | Gmail   |
+              +-------------------+
+\end{verbatim}
+
+\subsection{Backend Structure}
+\begin{verbatim}
+backend/
+|-- main.py, config.py, database.py
+|-- models.py, models_extended.py
+|-- routes/ (auth, events, admin, chat, dua)
+|-- schemas/ (auth, events, chat, dua)
+|-- services/ (email_service)
+\end{verbatim}
+
+% API Documentation
+\section{API Documentation}
+
+Base URL: \texttt{http://localhost:8000/api}. Interactive docs available at \texttt{/docs}.
+
+\subsection{Authentication Endpoints}
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Endpoint} & \textbf{Method} & \textbf{Auth} & \textbf{Description} \\
+\midrule
+/auth/signup & POST & No & Register new user \\
+/auth/login & POST & No & Login and get JWT token \\
+/auth/verify-email/\{token\} & GET & No & Verify email address \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Signup Request:} \texttt{\{"email": "...", "password": "...", "name": "..."\}}
+
+\textbf{Login Response:} \texttt{\{"access\_token": "...", "token\_type": "bearer", "user": \{...\}\}}
+
+\subsection{Events Endpoints}
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Endpoint} & \textbf{Method} & \textbf{Auth} & \textbf{Description} \\
+\midrule
+/events/ & GET & No & List all events \\
+/events/ & POST & Yes & Create new event \\
+/events/\{id\} & GET & No & Get event details \\
+/events/\{id\} & DELETE & Yes & Delete event \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{AI Endpoints}
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Endpoint} & \textbf{Method} & \textbf{Auth} & \textbf{Description} \\
+\midrule
+/dua/generate & POST & No & Generate dua for situation \\
+/chat/ & POST & No & AI chat for Islamic Q\&A \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% Database Schema
+\section{Database Schema}
+
+SQLite database with SQLAlchemy ORM. Two main tables with foreign key relationship.
+
+\subsection{Entity Relationship}
+\begin{verbatim}
+User (1) -----> (*) Event
+  |                  |
+  +--organizer_id----+
+\end{verbatim}
+
+\subsection{Tables}
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{User Table} & \textbf{Type} & \textbf{Description} \\
+\midrule
+id & Integer (PK) & Primary key \\
+email & String & Unique, indexed \\
+hashed\_password & String & bcrypt hash \\
+name & String & Display name \\
+is\_active & Boolean & Account status \\
+is\_admin & Boolean & Admin privileges \\
+is\_verified & Boolean & Email verified \\
+verification\_token & String & Email token \\
+created\_at & DateTime & Creation timestamp \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Event Table} & \textbf{Type} & \textbf{Description} \\
+\midrule
+id & Integer (PK) & Primary key \\
+title & String & Event title \\
+description & Text & Event details \\
+date, time & String & Event schedule \\
+location & String & Event location \\
+organizer\_id & Integer (FK) & User reference \\
+organizer\_name & String & Cached name \\
+is\_featured & Boolean & Featured flag \\
+created\_at & DateTime & Creation timestamp \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% Security Implementation
+\section{Security Implementation}
+
+\subsection{Authentication Flow}
+\begin{enumerate}[noitemsep]
+    \item User registers with email/password
+    \item Password hashed with bcrypt (salted)
+    \item Verification email sent via SMTP
+    \item User verifies email via link
+    \item Login returns JWT token (30-min expiry)
+    \item Token sent in Authorization header
+\end{enumerate}
+
+\subsection{Password Hashing}
+\begin{lstlisting}[language=Python]
+import bcrypt
+
+def get_password_hash(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return bcrypt.checkpw(plain.encode(), hashed.encode())
+\end{lstlisting}
+
+\subsection{JWT Token Generation}
+\begin{lstlisting}[language=Python]
+from jose import jwt
+from datetime import datetime, timedelta
+
+def create_access_token(data: dict) -> str:
+    expire = datetime.utcnow() + timedelta(minutes=30)
+    return jwt.encode({**data, "exp": expire}, SECRET_KEY, "HS256")
+\end{lstlisting}
+
+\subsection{Security Best Practices}
+\begin{itemize}[noitemsep]
+    \item CORS middleware configuration
+    \item Environment variables for secrets
+    \item Password hashing (never stored plain)
+    \item Token expiration
+    \item Email verification required
+    \item Role-based access control
+\end{itemize}
+
+% External Services Integration
+\section{External Services Integration}
+
+The Ramadan Helper Application integrates with external services to provide enhanced functionality beyond basic CRUD operations. This section describes the integration architecture and implementation details for each external service.
+
+\subsection{Groq AI API}
+
+The application uses Groq AI for intelligent features including dua generation and Islamic Q\&A. Groq provides fast inference for large language models, making it suitable for real-time conversational features.
+
+\textbf{Integration Architecture:}
+\begin{itemize}
+    \item API calls are made from the backend to prevent exposure of API keys
+    \item Responses are processed and formatted before being sent to the frontend
+    \item Error handling ensures graceful degradation if the AI service is unavailable
+\end{itemize}
+
+\begin{lstlisting}[language=Python, caption=Groq AI Service Integration]
+from groq import Groq
+
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+def generate_dua(situation: str, language: str = "english"):
+    response = client.chat.completions.create(
+        model="llama-3.1-70b-versatile",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are an Islamic scholar..."
+            },
+            {
+                "role": "user",
+                "content": f"Generate a dua for: {situation}"
+            }
+        ],
+        temperature=0.7,
+        max_tokens=1000
+    )
+    return response.choices[0].message.content
+\end{lstlisting}
+
+\subsection{Gmail SMTP Service}
+
+\begin{lstlisting}[language=Python, caption=Email Service Configuration]
+import smtplib
+from email.mime.text import MIMEText
+
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+SMTP_USER = os.getenv("SMTP_USER")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+
+def send_verification_email(to_email: str, token: str):
+    verification_url = f"{BASE_URL}/verify-email/{token}"
+    
+    msg = MIMEText(f"""
+    Please verify your email by clicking:
+    {verification_url}
+    """)
+    msg['Subject'] = 'Verify Your Ramadan Helper Account'
+    msg['From'] = SMTP_USER
+    msg['To'] = to_email
+    
+    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        server.starttls()
+        server.login(SMTP_USER, SMTP_PASSWORD)
+        server.send_message(msg)
+\end{lstlisting}
+
+\newpage
+
+% Frontend Architecture
+\section{Frontend Architecture}
+
+The frontend of the Ramadan Helper Application is designed as a single-page application (SPA) that provides a seamless user experience without full page reloads. This section describes the frontend architecture and key implementation decisions.
+
+\subsection{Single Page Application Design}
+
+The frontend is implemented as a single HTML file with embedded CSS and JavaScript, providing a responsive and interactive user experience. This approach was chosen for its simplicity and ease of deployment, while still providing modern SPA functionality.
+
+\textbf{Advantages of this approach:}
+\begin{itemize}
+    \item No build process required for development
+    \item Easy deployment to any static file server
+    \item Minimal dependencies and fast loading times
+    \item Full control over the application lifecycle
+\end{itemize}
+
+\subsection{Key Components}
+
+\begin{itemize}
+    \item \textbf{Navigation}: Tab-based navigation between sections
+    \item \textbf{Authentication Modal}: Login/Signup forms
+    \item \textbf{Events Display}: Featured and regular events listing
+    \item \textbf{Event Creation Form}: For authenticated users
+    \item \textbf{AI Chat Interface}: Interactive chat with AI assistant
+    \item \textbf{Admin Panel}: User and event management (admin only)
+\end{itemize}
+
+\subsection{API Communication}
+
+\begin{lstlisting}[language=JavaScript, caption=Frontend API Helper Function]
+async function apiCall(endpoint, method = 'GET', body = null) {
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    
+    const token = localStorage.getItem('token');
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const options = { method, headers };
+    if (body) {
+        options.body = JSON.stringify(body);
+    }
+    
+    const response = await fetch(
+        `http://localhost:8000/api${endpoint}`, 
+        options
+    );
+    
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return response.json();
+}
+\end{lstlisting}
+
+\subsection{State Management}
+
+\begin{lstlisting}[language=JavaScript, caption=Local Storage State Management]
+// Store authentication state
+function saveAuthState(token, user) {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+}
+
+// Retrieve authentication state
+function getAuthState() {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    return { token, user };
+}
+
+// Clear authentication state
+function clearAuthState() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+}
+\end{lstlisting}
+
+\newpage
+
+% Testing
+\section{Testing}
+
+Testing is essential for ensuring the reliability and correctness of the application. This section describes the testing strategy and available test suites for the Ramadan Helper Application.
+
+The project includes multiple test files targeting different aspects of the application functionality. Tests are written using Python's pytest framework and can be executed both individually and as a complete suite.
+
+\subsection{Test Files Overview}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Test File} & \textbf{Purpose} \\
+\midrule
+test\_simple\_app.py & Basic endpoint connectivity \\
+test\_dua\_only.py & Dua generation functionality \\
+test\_chat\_dua.py & AI chat integration \\
+test\_semantic\_search.py & Quran search feature \\
+test\_imam\_registration.py & Imam registration flow \\
+test\_new\_endpoints.py & New API endpoints \\
+\bottomrule
+\end{tabular}
+\caption{Test Suite Overview}
+\end{table}
+
+\subsection{Running Tests}
+
+\begin{lstlisting}[language=bash, caption=Test Execution Commands]
+# Run all tests
+python -m pytest
+
+# Run specific test file
+python -m pytest test_simple_app.py -v
+
+# Run with coverage report
+python -m pytest --cov=backend --cov-report=html
+\end{lstlisting}
+
+\newpage
+
+% Deployment
+\section{Deployment}
+
+This section provides comprehensive instructions for deploying the Ramadan Helper Application in various environments, from local development to production deployment.
+
+\subsection{Local Development Setup}
+
+Follow these steps to set up the development environment on your local machine:
+
+\begin{lstlisting}[language=bash, caption=Development Environment Setup]
+# Clone repository
+git clone https://github.com/cheehub213/ramadan-webservice-project-.git
+cd ramadan-webservice-project-
+
+# Create virtual environment
+python -m venv .venv
+.venv\Scripts\Activate.ps1  # Windows
+source .venv/bin/activate    # Linux/Mac
+
+# Install dependencies
+pip install -r backend/requirements.txt
+
+# Configure environment
+# Create backend/.env with:
+# GROQ_API_KEY=your_api_key
+# SMTP_USER=your_email@gmail.com
+# SMTP_PASSWORD=your_app_password
+# SECRET_KEY=your_secret_key
+
+# Start backend server
+cd backend
+python main.py
+
+# Start frontend (new terminal)
+cd app/schemas/frontend\ webservice\ site
+python -m http.server 8080
+\end{lstlisting}
+
+\subsection{Docker Deployment}
+
+\begin{lstlisting}[language=bash, caption=Docker Compose Configuration]
+# docker-compose.yml
+version: '3.8'
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    volumes:
+      - ./data:/app/data
+\end{lstlisting}
+
+\subsection{Production Considerations}
+
+\begin{itemize}
+    \item Replace SQLite with PostgreSQL for production
+    \item Configure HTTPS with SSL certificates
+    \item Set up reverse proxy (nginx/Apache)
+    \item Implement rate limiting
+    \item Configure proper CORS origins
+    \item Use production WSGI server (Gunicorn/Uvicorn workers)
+\end{itemize}
+
+\newpage
+
+% Troubleshooting
+\section{Troubleshooting}
+
+During development and deployment, various issues may arise. This section documents common problems encountered and their solutions, serving as a reference for developers and system administrators.
+
+\subsection{Common Issues and Solutions}
+
+\subsubsection{bcrypt Compatibility Error}
+\textbf{Issue:} \texttt{AttributeError: module 'bcrypt' has no attribute '\_\_about\_\_'}
+
+\textbf{Solution:} Use bcrypt directly instead of passlib:
+\begin{lstlisting}[language=Python]
+import bcrypt
+# Instead of passlib.context.CryptContext
+\end{lstlisting}
+
+\subsubsection{Events Not Displaying}
+\textbf{Issue:} Posted events don't appear in the events list
+
+\textbf{Solution:} Ensure JavaScript element IDs match HTML:
+\begin{lstlisting}[language=JavaScript]
+// Correct element ID
+document.getElementById('eventsList')
+// Not 'eventsContainer'
+\end{lstlisting}
+
+\subsubsection{CORS Errors}
+\textbf{Issue:} Cross-origin request blocked
+
+\textbf{Solution:} Configure CORS in FastAPI:
+\begin{lstlisting}[language=Python]
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8080"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+\end{lstlisting}
+
+\newpage
+
+% Conclusion
+\section{Conclusion}
+
+\subsection{Project Achievements}
+
+The Ramadan Helper Application successfully achieves its primary objectives of providing a comprehensive digital platform for Muslims during Ramadan. The key accomplishments of this project include:
+
+\begin{itemize}
+    \item \textbf{Functional RESTful API:} A well-structured API with proper authentication, authorization, and error handling that follows industry best practices.
+    \item \textbf{AI Integration:} Successful integration with Groq AI for intelligent dua generation and Islamic Q\&A functionality.
+    \item \textbf{Secure Authentication:} Implementation of JWT-based authentication with bcrypt password hashing and email verification.
+    \item \textbf{Community Features:} Event management system allowing users to create, share, and discover community events.
+    \item \textbf{Responsive Frontend:} A user-friendly single-page application that works across different devices.
+\end{itemize}
+
+\subsection{Lessons Learned}
+
+During the development of this project, several valuable lessons were learned:
+
+\begin{enumerate}
+    \item \textbf{Library Compatibility:} The importance of checking library compatibility with Python versions, as demonstrated by the bcrypt/passlib issue with Python 3.12.
+    \item \textbf{API Design:} The value of consistent API design patterns for maintainability and ease of frontend integration.
+    \item \textbf{Error Handling:} The necessity of comprehensive error handling and meaningful error messages for debugging.
+\end{enumerate}
+
+\subsection{Future Improvements}
+
+Potential enhancements for future versions include:
+
+\begin{itemize}
+    \item Migration to PostgreSQL for production deployment
+    \item Implementation of real-time notifications using WebSockets
+    \item Mobile application development using React Native
+    \item Integration with prayer time APIs for location-based features
+    \item Multi-language support for international users
+\end{itemize}
+
+\newpage
+
+% Appendix
+\section{Appendix}
+
+\subsection{Environment Variables Reference}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Variable} & \textbf{Description} & \textbf{Required} \\
+\midrule
+GROQ\_API\_KEY & Groq AI API key & Yes \\
+SMTP\_USER & Gmail address & Yes \\
+SMTP\_PASSWORD & Gmail app password & Yes \\
+SECRET\_KEY & JWT signing key & Yes \\
+DEBUG & Enable debug mode & No \\
+DATABASE\_URL & Database connection & No \\
+\bottomrule
+\end{tabular}
+\caption{Environment Variables}
+\end{table}
+
+\subsection{API Status Codes}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Code} & \textbf{Description} \\
+\midrule
+200 & Success \\
+201 & Created \\
+400 & Bad Request \\
+401 & Unauthorized \\
+403 & Forbidden \\
+404 & Not Found \\
+422 & Validation Error \\
+500 & Internal Server Error \\
+\bottomrule
+\end{tabular}
+\caption{HTTP Status Codes}
+\end{table}
+
+\subsection{Version History}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Version} & \textbf{Date} & \textbf{Changes} \\
+\midrule
+v0 & Jan 2026 & Initial release with all features \\
+v1.0 & Jan 2026 & Bug fixes: auth, events display \\
+\bottomrule
+\end{tabular}
+\caption{Version History}
+\end{table}
+
+\vfill
+
+\begin{center}
+\rule{0.5\textwidth}{0.5pt}
+
+\vspace{0.5cm}
+\textit{End of Technical Documentation}
+
+\vspace{0.3cm}
+{\small Ramadan Helper Application v1.0}
+
+{\small Developed by Chiheb Bahri}
+
+{\small Under the supervision of Montassar Ben Messaoud}
+\end{center}
+
+\end{document}

@@ -23,7 +23,7 @@ SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER", "")  # Your email
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")  # App password for Gmail
-SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "Ramadan Helper")
+SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "myRamadan")
 SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", SMTP_USER)
 
 # Debug: Print SMTP config at startup
@@ -94,7 +94,7 @@ def send_verification_email(to_email: str, name: str, token: str) -> dict:
     """
     verification_link = get_verification_link(token)
     
-    subject = "🌙 Verify Your Ramadan Helper Account"
+    subject = "🌙 Verify Your myRamadan Account"
     
     html_content = f"""
     <!DOCTYPE html>
@@ -119,13 +119,13 @@ def send_verification_email(to_email: str, name: str, token: str) -> dict:
         <div class="container">
             <div class="header">
                 <div class="logo">☪️</div>
-                <h1>Ramadan Helper</h1>
+                <h1>myRamadan</h1>
                 <p class="subtitle">Your Islamic Companion</p>
             </div>
             
             <div class="content">
                 <p>Assalamu Alaikum <strong>{name}</strong>,</p>
-                <p>Welcome to Ramadan Helper! 🌙</p>
+                <p>Welcome to myRamadan! 🌙</p>
                 <p>Please verify your email address to activate your account and access all features:</p>
                 
                 <div style="text-align: center;">
@@ -139,12 +139,12 @@ def send_verification_email(to_email: str, name: str, token: str) -> dict:
                 <p>If the button doesn't work, copy and paste this link into your browser:</p>
                 <p class="link">{verification_link}</p>
                 
-                <p>If you didn't create an account with Ramadan Helper, please ignore this email.</p>
+                <p>If you didn't create an account with myRamadan, please ignore this email.</p>
             </div>
             
             <div class="footer">
                 <p>☪️ Ramadan Mubarak</p>
-                <p>© 2026 Ramadan Helper. May Allah accept from us.</p>
+                <p>© 2026 myRamadan. May Allah accept from us.</p>
             </div>
         </div>
     </body>
@@ -154,7 +154,7 @@ def send_verification_email(to_email: str, name: str, token: str) -> dict:
     text_content = f"""
     Assalamu Alaikum {name},
     
-    Welcome to Ramadan Helper!
+    Welcome to myRamadan!
     
     Please verify your email address to activate your account:
     {verification_link}
@@ -182,7 +182,7 @@ def send_password_reset_email(to_email: str, name: str, token: str) -> dict:
     """
     reset_link = get_password_reset_link(token)
     
-    subject = "🔑 Reset Your Ramadan Helper Password"
+    subject = "🔑 Reset Your myRamadan Password"
     
     html_content = f"""
     <!DOCTYPE html>
@@ -207,7 +207,7 @@ def send_password_reset_email(to_email: str, name: str, token: str) -> dict:
             <div class="header">
                 <div class="logo">🔑</div>
                 <h1>Password Reset</h1>
-                <p class="subtitle">Ramadan Helper</p>
+                <p class="subtitle">myRamadan</p>
             </div>
             
             <div class="content">
@@ -230,7 +230,7 @@ def send_password_reset_email(to_email: str, name: str, token: str) -> dict:
             
             <div class="footer">
                 <p>☪️ Ramadan Mubarak</p>
-                <p>© 2026 Ramadan Helper. May Allah accept from us.</p>
+                <p>© 2026 myRamadan. May Allah accept from us.</p>
             </div>
         </div>
     </body>
@@ -266,7 +266,7 @@ def send_welcome_email(to_email: str, name: str) -> bool:
     """
     Send welcome email after successful verification
     """
-    subject = "🌙 Welcome to Ramadan Helper!"
+    subject = "🌙 Welcome to myRamadan!"
     
     html_content = f"""
     <!DOCTYPE html>
@@ -288,14 +288,14 @@ def send_welcome_email(to_email: str, name: str) -> bool:
         <div class="container">
             <div class="header">
                 <div class="logo">☪️</div>
-                <h1>Welcome to Ramadan Helper!</h1>
+                <h1>Welcome to myRamadan!</h1>
                 <p class="subtitle">Your account is now verified ✅</p>
             </div>
             
             <div class="content">
                 <p>Assalamu Alaikum <strong>{name}</strong>,</p>
                 <p>Alhamdulillah! Your email has been verified and your account is now active.</p>
-                <p>Here's what you can do with Ramadan Helper:</p>
+                <p>Here's what you can do with myRamadan:</p>
                 
                 <div class="feature">📿 <strong>Dua Generator</strong> - Get personalized duas for any situation</div>
                 <div class="feature">🔍 <strong>AI Analyzer</strong> - Find relevant Quran verses and Hadith</div>
@@ -308,7 +308,7 @@ def send_welcome_email(to_email: str, name: str) -> bool:
             
             <div class="footer">
                 <p>☪️ Ramadan Mubarak</p>
-                <p>© 2026 Ramadan Helper. May Allah accept from us.</p>
+                <p>© 2026 myRamadan. May Allah accept from us.</p>
             </div>
         </div>
     </body>
@@ -320,7 +320,7 @@ def send_welcome_email(to_email: str, name: str) -> bool:
     
     Alhamdulillah! Your email has been verified and your account is now active.
     
-    You can now use all features of Ramadan Helper:
+    You can now use all features of myRamadan:
     - Dua Generator
     - AI Analyzer
     - Chat with Imams

@@ -157,7 +157,7 @@ window.addEventListener('DOMContentLoaded', async function() {
     // Ensure user exists and load videos
     const userEmail = localStorage.getItem('userEmail') || 'guest@ramadan.local';
     try {
-        await ensureUserExists(userEmail, 'Ramadan Helper User');
+        await ensureUserExists(userEmail, 'myRamadan User');
         await displayAllVideosAPI();
     } catch (error) {
         console.error('Initialization error:', error);

@@ -343,7 +343,7 @@ async def verify_email(request: EmailVerifyRequest, db: Session = Depends(get_db
     )
     
     return {
-        "message": "Email verified successfully! Welcome to Ramadan Helper.",
+        "message": "Email verified successfully! Welcome to myRamadan.",
         "verified": True,
         "access_token": access_token,
         "refresh_token": refresh_token,

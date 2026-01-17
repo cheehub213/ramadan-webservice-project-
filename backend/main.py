@@ -1,5 +1,5 @@
 """
-Ramadan Helper - FastAPI Backend with JWT Authentication
+myRamadan - FastAPI Backend with JWT Authentication
 Comprehensive REST API for all services including Events (Tunisia)
 """
 from dotenv import load_dotenv
@@ -17,9 +17,9 @@ Base.metadata.create_all(bind=engine)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="🌙 Ramadan Helper API",
+    title="🌙 myRamadan API",
     description="""
-## Complete REST API for Ramadan Helper Application
+## Complete REST API for myRamadan Application
 
 ### 🔐 Authentication
 This API uses **JWT (JSON Web Tokens)** for authentication.
@@ -62,7 +62,7 @@ app.include_router(api_router)
 def read_root():
     """Root endpoint with API info"""
     return {
-        "name": "🌙 Ramadan Helper API",
+        "name": "🌙 myRamadan API",
         "version": "3.0",
         "description": "Complete REST API with JWT Authentication for Islamic guidance and resources",
         "docs": "http://localhost:8000/docs",
@@ -89,7 +89,7 @@ def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "service": "Ramadan Helper API",
+        "service": "myRamadan API",
         "version": "3.0"
     }
 
@@ -110,7 +110,7 @@ async def startup():
         db.commit()
     db.close()
     
-    print("✅ Ramadan Helper Backend started successfully!")
+    print("✅ myRamadan Backend started successfully!")
     print("📚 Services available:")
     print("   - 🔐 JWT Authentication")
     print("   - 👤 Users Management")

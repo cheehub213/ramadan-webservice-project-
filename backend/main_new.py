@@ -1,5 +1,5 @@
 """
-Ramadan Helper - FastAPI Backend
+myRamadan - FastAPI Backend
 Comprehensive REST API for all services
 """
 from fastapi import FastAPI
@@ -14,8 +14,8 @@ Base.metadata.create_all(bind=engine)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Ramadan Helper API",
-    description="Complete REST API for Ramadan Helper Application",
+    title="myRamadan API",
+    description="Complete REST API for myRamadan Application",
     version="2.0"
 )
 
@@ -36,7 +36,7 @@ app.include_router(api_router)
 def read_root():
     """Root endpoint with API info"""
     return {
-        "name": "Ramadan Helper API",
+        "name": "myRamadan API",
         "version": "2.0",
         "description": "Complete REST API for Islamic guidance and resources",
         "docs": "http://localhost:8000/docs",
@@ -67,7 +67,7 @@ async def startup():
         db.commit()
     db.close()
     
-    print("✅ Ramadan Helper Backend started successfully!")
+    print("✅ myRamadan Backend started successfully!")
     print("📚 Services available:")
     print("   - Users Management")
     print("   - Dua Generation & History")

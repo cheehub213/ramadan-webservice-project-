@@ -1,5 +1,5 @@
 """
-Complete API Routes with JWT Authentication for Ramadan Helper
+Complete API Routes with JWT Authentication for myRamadan
 Includes: Auth, Users, Dua, Chat, AI Analyzer, Videos, Events, History
 """
 from fastapi import APIRouter, HTTPException, Depends, status
@@ -653,7 +653,7 @@ async def health_check():
     """Check API health status"""
     return {
         "status": "healthy",
-        "message": "Ramadan Helper API is running",
+        "message": "myRamadan API is running",
         "timestamp": datetime.now().isoformat(),
         "features": ["JWT Auth", "Dua Generator", "AI Analyzer", "Chat with Imam", "Events (Tunisia)"]
     }

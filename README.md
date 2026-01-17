@@ -1,4 +1,4 @@
-# 🌙 Ramadan Helper - Islamic Web Application
+# 🌙 myRamadan - Islamic Web Application
 
 A comprehensive Islamic web application that provides spiritual guidance, personalized duas, AI-powered Islamic Q&A, imam consultations, Islamic video search, and **Ramadan Events platform for Tunisia**.
 
@@ -12,7 +12,7 @@ A comprehensive Islamic web application that provides spiritual guidance, person
 
 ## 📌 Project Description
 
-**Ramadan Helper** is a full-stack web application designed to support Muslims in their spiritual journey during Ramadan and beyond. The application combines Islamic scholarship with AI technology to provide:
+**myRamadan** is a full-stack web application designed to support Muslims in their spiritual journey during Ramadan and beyond. The application combines Islamic scholarship with AI technology to provide:
 
 - 🔐 **JWT Authentication** - Secure login with email verification and Bearer token authentication
 - 🤖 **AI-Powered Islamic Q&A** - Ask questions and receive relevant Quran verses (Ayahs) using semantic search
@@ -452,10 +452,10 @@ Response:
 ### 🏠 Home Page
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  🌙 Ramadan Helper                    [Home] [Login/Signup] │
+│  🌙 myRamadan                         [Home] [Login/Signup] │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│           ☪️ Welcome to Ramadan Helper                      │
+│           ☪️ Welcome to myRamadan                          │
 │     Your personal Islamic companion for duas,               │
 │         guidance, and spiritual connection                  │
 │                                                             │
@@ -683,6 +683,6 @@ For questions or support, please open an issue on GitHub.
 
 🌙 Ramadan Mubarak! 🌙
 
-*© 2026 Ramadan Helper - All Rights Reserved*
+*© 2026 myRamadan - All Rights Reserved*
 
 </div>

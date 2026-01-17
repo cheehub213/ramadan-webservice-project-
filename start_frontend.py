@@ -7,7 +7,7 @@ import socketserver
 import os
 
 # Change to the directory containing app.html
-os.chdir(r"C:\Users\cheeh\Desktop\webservice ramadan\app\schemas\frontend webservice site")
+os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "schemas", "frontend webservice site"))
 
 PORT = 8080
 Handler = http.server.SimpleHTTPRequestHandler
